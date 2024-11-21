@@ -30,7 +30,7 @@ bool Sphere::hit (Ray r, HitRecord &record)
         }
 
         record.hit_point = r.at (record.lambda);
-        record.setNormal (r, (record.hit_point - this->location).unit ());
+        record.setNormal (r, (record.hit_point - this->location));
         record.mat = this->mat;
 
         return true;

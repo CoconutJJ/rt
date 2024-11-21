@@ -1,13 +1,20 @@
 #include "hitrecord.hpp"
+#include "vec3.hpp"
 
 HitRecord::HitRecord () : hit_point (0, 0, 0), normal (0, 0, 0)
 {
 }
 
-void HitRecord::setNormal (Ray r, Vec3 normal)
+void HitRecord::setNormal (Ray r, Vec3 outward_normal)
 {
-        if (r.direction.dot (normal) > 0)
-                normal = -normal;
+        Vec3 opposing_normal;
+        if (r.direction.dot (outward_normal) > 0) {
+                opposing_normal = -outward_normal;
+                front_face = false;
+        } else {
+                front_face = true;
+                opposing_normal = outward_normal;
+        }
 
-        this->normal = normal;
+        this->normal = opposing_normal.unit ();
 }

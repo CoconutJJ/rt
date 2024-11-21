@@ -98,7 +98,7 @@ Vec3 Vec3::cross (Vec3 &b)
 
 double Vec3::length_squared ()
 {
-        return std::sqrt (this->x * this->x + this->y * this->y + this->z * this->z);
+        return this->x * this->x + this->y * this->y + this->z * this->z;
 }
 
 double Vec3::length ()
@@ -121,7 +121,7 @@ Vec3 Vec3::random ()
         while (true) {
                 Vec3 v = Vec3 (random_double (-1, 1), random_double (-1, 1), random_double (-1, 1));
 
-                if (v.length_squared () > 1e-160 && v.length_squared() < 1.0)
+                if (v.length_squared () > 1e-160 && v.length_squared () < 1.0)
                         return v;
         }
 }
@@ -134,4 +134,12 @@ Vec3 Vec3::reflect (Vec3 normal)
 bool Vec3::near_zero ()
 {
         return std::fabs (this->x) < 1e-8 && std::fabs (this->y) < 1e-8 && std::fabs (this->z) < 1e-8;
+}
+
+Vec3 Vec3::refract (Vec3 n, double mu)
+{
+        Vec3 perp = (*this + n * (std::fmin (-(this->dot (n)), 1.0))) * mu;
+        Vec3 parallel = -n * std::sqrt (std::fabs (1.0 - perp.length_squared ()));
+
+        return perp + parallel;
 }

@@ -1,0 +1,10 @@
+usage: rt [ARGUMENTS]
+
+ARGUMENTS:
+
+-f | --out_file         PPM image output file name
+-w | --image_width      PPM image width
+-r | --aspect_ratio     aspect ratio of image (default: 16/9, height = width / aspect_ratio)
+-v | --vfov             Vertical Field of View (default: 90, FOV in degrees)
+-t | --defocus_angle    Defocus blur lens radius (default: 0.0 - no blur),
+-d | --focus_dist       Focus Distance (default: 1)

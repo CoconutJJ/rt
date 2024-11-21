@@ -27,6 +27,7 @@ class Vec3 {
         Vec3 unit ();
         Vec3 clamp (double min, double max);
         Vec3 reflect(Vec3 normal);
+        Vec3 refract(Vec3 n, double mu);
         bool near_zero();
         static Vec3 random();
 };

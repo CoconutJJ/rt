@@ -1,2 +1,6 @@
 *.dSYM/
 *.ppm
+*.gch
+.DS_Store
+rt
+a.out

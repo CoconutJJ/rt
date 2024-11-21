@@ -11,5 +11,6 @@ class HitRecord {
         double lambda;
         Vec3 normal;
         Material *mat;
+        bool front_face;
         void setNormal(Ray r, Vec3 normal);
 };

@@ -12,7 +12,7 @@ Ray::Ray (Vec3 origin, Vec3 direction) : origin (origin), direction (direction)
 
 Vec3 Ray::at (double t)
 {
-        return this->origin + this->direction * t;
+        return this->origin + this->direction * t * (1 - 0.00001);
 }
 
 Ray Ray::nudge (double maxX, double maxY)
