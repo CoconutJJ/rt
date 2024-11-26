@@ -143,3 +143,10 @@ Vec3 Vec3::refract (Vec3 n, double mu)
 
         return perp + parallel;
 }
+
+
+Vec3 Vec3::elem_mul(Vec3 b) {
+
+
+        return Vec3(this->x * b.x, this->y * b.y, this->z * b.z);
+}

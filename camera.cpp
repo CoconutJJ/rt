@@ -7,8 +7,11 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <ostream>
+#include <semaphore>
 #include <sys/ioctl.h>
+#include <thread>
 #include <unistd.h>
 
 Camera::Camera () : pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), center (0, 0, 0), stream (std::cout)
@@ -20,7 +23,7 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov)
         this->aspect_ratio = aspect_ratio;
         this->image_width = image_width;
         this->lookat = Vec3 (0, 0, -1);
-        this->center = Vec3 (-2, 2, 1);
+        this->center = Vec3 (0, 0, 0);
         this->defocus_angle = 0.0;
         this->focus_dist = 3.4;
         Vec3 w = (this->center - this->lookat).unit ();
@@ -61,7 +64,9 @@ Ray Camera::ray (int du, int dv)
         Vec3 origin = this->defocus_angle <= 0.0 ? this->center : this->defocus_disk_sample ();
         Vec3 direction = pixel_00 + (pixel_du * du) + (pixel_dv * dv) - origin;
 
-        return Ray (origin, direction);
+        double time = random_double (0, 1);
+
+        return Ray (origin, direction, time);
 }
 
 Vec3 Camera::ray_color (Ray r, World *world, int depth)
@@ -74,13 +79,13 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
                 Vec3 color;
                 Ray scatter;
                 if (record.mat->scatter (r, record, color, scatter)) {
-                        return color * this->ray_color (scatter, world, depth - 1);
+                        return color + this->ray_color (scatter, world, depth - 1) * 0.01;
                 }
 
                 return Vec3 (0, 0, 0);
         }
-        double s = (r.direction.unit ().y + 1.0) / 2.0;
-        return Vec3 (1.0, 1.0, 1.0) * (1.0 - s) + Vec3 (0.5, 0.7, 1.0) * s;
+
+        return Vec3 (0, 0, 0);
 }
 
 void Camera::write_color (Vec3 color)
@@ -113,6 +118,57 @@ void progress (int progress, int total)
         std::fprintf (stderr, "%.2lf%%", percentage * 100);
         std::cerr << '\r';
         std::cerr.flush ();
+}
+
+void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
+{
+        std::ofstream file_stream = std::ofstream (std::string (filename));
+        this->stream.rdbuf (file_stream.rdbuf ());
+
+        this->stream << "P3\n"
+                     << this->image_width << ' ' << this->image_height << "\n"
+                     << "255"
+                     << "\n";
+
+        int p = 0;
+
+        std::mutex pixel_lock;
+        std::counting_semaphore<> sem (max_threads);
+        std::vector<std::thread> threads;
+        std::vector<Vec3> pixels (this->image_width * this->image_height);
+
+        for (int j = 0; j < this->image_height; j++) {
+                threads.push_back (std::thread ([&, j] {
+                        sem.acquire ();
+                        for (int i = 0; i < this->image_width; i++) {
+                                Vec3 pixel_color (0, 0, 0);
+                                for (int sample = 0; sample < this->samples_per_pixel; sample++) {
+                                        // std::cerr << "Thread " << i << ", " << j << ", " << sample << " start\n";
+                                        Ray r = this->ray (i + random_double (-0.5, 0.5),
+                                                           j + random_double (-0.5, 0.5));
+
+                                        Vec3 color = this->ray_color (r, world, this->max_depth);
+                                        pixel_color += color;
+                                        // std::cerr << "Thread " << i << ", " << j << ", " << sample << " finish\n";
+                                }
+
+                                pixel_color *= 1.0 / double (this->samples_per_pixel);
+
+                                pixel_lock.lock ();
+                                pixels[i + j * image_width] = pixel_color;
+                                pixel_lock.unlock ();
+                        }
+                        sem.release ();
+                }));
+        }
+
+        for (std::thread &t : threads)
+                t.join ();
+
+        for (Vec3 &pixel_color : pixels)
+                this->write_color (pixel_color);
+
+        file_stream.close ();
 }
 
 void Camera::render (World *world, const char *filename)

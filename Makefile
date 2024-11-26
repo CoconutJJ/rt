@@ -1,7 +1,10 @@
 
 rt: *.cpp *.hpp
 	xxd -i help.txt > usage.hpp
-	g++ -O3 -flto -std=c++11 \
+	g++ -O3 -flto -std=c++20 \
+		texture.cpp \
+		solid_texture.cpp \
+		image_texture.cpp \
 		camera.cpp \
 		material.cpp \
 		lambertian.cpp \
@@ -15,4 +18,6 @@ rt: *.cpp *.hpp
 		world.cpp \
 		main.cpp \
 		dielectric.cpp \
+		phong.cpp \
+		light.cpp \
 		utils.cpp -o rt

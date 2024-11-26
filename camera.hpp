@@ -32,6 +32,7 @@ class Camera {
         Camera ();
         void initialize (double aspect_ratio, int image_width, double vfov);
         void render(World * world, const char * filename);
+        void render_multithreaded(World * world, const char *filename, int max_threads);
         Ray ray (int i, int j);
         Vec3 ray_color(Ray r, World *world, int depth);
         void write_color(Vec3 color);

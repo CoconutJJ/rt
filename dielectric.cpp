@@ -25,7 +25,7 @@ bool Dielectric::scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scat
                 direction = unit_direction.refract (record.normal, mu);
         }
 
-        scattered = Ray (record.hit_point, direction);
+        scattered = Ray (record.hit_point, direction, r.time);
 
         return true;
 }

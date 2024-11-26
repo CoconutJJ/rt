@@ -2,8 +2,12 @@
 #include "vec3.hpp"
 #include <cstdlib>
 
-Ray::Ray() {
-    
+Ray::Ray ()
+{
+}
+
+Ray::Ray (Vec3 origin, Vec3 direction, double time) : origin (origin), direction (direction), time (time)
+{
 }
 
 Ray::Ray (Vec3 origin, Vec3 direction) : origin (origin), direction (direction)
