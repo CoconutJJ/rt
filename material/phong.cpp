@@ -5,14 +5,8 @@
 #include "texture.hpp"
 #include "vec3.hpp"
 
-Phong::Phong (double rs,
-              double rd,
-              double ra,
-              double rg,
-              double shininess,
-              Texture *texture)
-        : rs (rs), rd (rd), ra (ra), rg (rg), shininess (shininess),
-          Material (texture)
+Phong::Phong (double rs, double rd, double ra, double rg, double shininess, Texture *texture)
+        : rs (rs), rd (rd), ra (ra), rg (rg), shininess (shininess), Material (texture)
 {
 }
 

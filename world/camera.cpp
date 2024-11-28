@@ -76,7 +76,7 @@ Ray Camera::ray (int du, int dv)
 Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, Material::PhongParams params, int K)
 {
         Vec3 to_camera = (this->center - record.hit_point).unit ();
-        Vec3 diffuse_component(0,0,0), specular_component(0,0,0);
+        Vec3 diffuse_component (0, 0, 0), specular_component (0, 0, 0);
 
         if (light->is_point_light ()) {
                 Vec3 point = light->sample_point ();
@@ -84,8 +84,8 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                 Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
                 if (world->has_path (record.hit_point, point)) {
-                        diffuse_component = light->diffuse_intensity (point) *
-                                            std::max (0.0, light_direction.dot (record.normal));
+                        diffuse_component =
+                                light->diffuse_intensity (point) * std::max (0.0, light_direction.dot (record.normal));
                         specular_component = light->specular_intensity (point) *
                                              std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha);
                 }
@@ -97,7 +97,7 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
 
                         if (world->has_path (record.hit_point, point)) {
                                 diffuse_component += light->diffuse_intensity (point) *
-                                                     std::max (0.0, light_direction.dot (record.outward_normal())) / K;
+                                                     std::max (0.0, light_direction.dot (record.outward_normal ())) / K;
                                 Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
                                 specular_component +=

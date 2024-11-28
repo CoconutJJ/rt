@@ -1,8 +1,7 @@
 #pragma once
-#include "vec3.hpp"
-#include "ray.hpp"
 #include "material.hpp"
-
+#include "ray.hpp"
+#include "vec3.hpp"
 
 class HitRecord {
     public:
@@ -13,6 +12,6 @@ class HitRecord {
         Material *mat;
         Vec3 uv;
         bool front_face;
-        void setNormal(Ray r, Vec3 normal);
-        Vec3 outward_normal();
+        void setNormal (Ray r, Vec3 normal);
+        Vec3 outward_normal ();
 };

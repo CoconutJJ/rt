@@ -1,12 +1,8 @@
 #pragma once
 
 class SceneParser {
+    public:
+        SceneParser ();
 
-    public: 
-
-        SceneParser();
-
-        void parse(const char * filename);
-
-
+        void parse (const char *filename);
 };

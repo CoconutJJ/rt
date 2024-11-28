@@ -32,7 +32,7 @@ bool World::hit (Ray r, HitRecord &record)
         for (Object *obj : this->objects) {
                 if (!obj->hit (r, curr_record))
                         continue;
-                
+
                 if (curr_record.lambda < lambda_max && curr_record.lambda > lambda_min) {
                         lambda_max = curr_record.lambda;
                         record = curr_record;
@@ -48,7 +48,7 @@ bool World::has_path (Ray r, Object *obj)
         HitRecord obj_rec;
         if (!obj->hit (r, obj_rec))
                 return false;
-        
+
         double lambda_min = 0.001;
 
         for (Object *curr : this->objects) {

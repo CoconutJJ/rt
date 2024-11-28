@@ -1,5 +1,4 @@
 #include "camera.hpp"
-#include "dielectric.hpp"
 #include "image_texture.hpp"
 #include "lambertian.hpp"
 #include "light.hpp"
@@ -11,7 +10,6 @@
 #include "quad_light.hpp"
 #include "solid_texture.hpp"
 #include "sphere.hpp"
-#include "texture.hpp"
 #include "usage.hpp"
 #include "vec3.hpp"
 #include "world.hpp"

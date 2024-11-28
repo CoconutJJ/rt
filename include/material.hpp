@@ -7,8 +7,8 @@ class HitRecord;
 
 class Material {
     public:
-        Material();
-        Material(Texture *texture);
+        Material ();
+        Material (Texture *texture);
 
         Texture *texture;
         struct PhongParams {
@@ -17,7 +17,7 @@ class Material {
                 double rd;
                 double rg;
                 double alpha;
-                // double gamma; 
+                // double gamma;
                 Vec3 color;
         };
 
@@ -30,7 +30,4 @@ class Material {
         {
                 return PhongParams{ 0, 0, 0, 0, 0, Vec3 (0, 0, 0) };
         };
-
-
-
 };

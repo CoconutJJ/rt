@@ -27,11 +27,11 @@ Plane::Plane (Vec3 location, Vec3 normal, Material *material) : Object (location
 
 Vec3 Plane::to_texture_uv (Vec3 point)
 {
-        double alpha = normal.dot (v.cross (point - location)) / normal.dot(v.cross(u));
+        double alpha = normal.dot (v.cross (point - location)) / normal.dot (v.cross (u));
 
-        double beta = normal.dot(u.cross(point - location)) / normal.dot(u.cross(v));
+        double beta = normal.dot (u.cross (point - location)) / normal.dot (u.cross (v));
 
-        return Vec3(alpha, beta, 0);
+        return Vec3 (alpha, beta, 0);
 }
 
 bool Plane::hit (Ray r, HitRecord &record)

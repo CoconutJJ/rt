@@ -1,6 +1,6 @@
 
 rt: **/*.cpp include/*.hpp
-	xxd -i help.txt > usage.hpp
+	xxd -i help.txt > include/usage.hpp
 	g++ -O3 -flto -std=c++20 -Iinclude/ \
 		texture/texture.cpp \
 		texture/solid_texture.cpp \
