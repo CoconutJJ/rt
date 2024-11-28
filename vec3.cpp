@@ -86,12 +86,17 @@ Vec3 Vec3::operator*= (double d)
         return *this;
 }
 
+bool Vec3::operator== (Vec3 b)
+{
+        return (this->x == b.x) && (this->y == b.y) && (this->z == b.z);
+}
+
 double Vec3::dot (Vec3 b)
 {
         return this->x * b.x + this->y * b.y + this->z * b.z;
 }
 
-Vec3 Vec3::cross (Vec3 &b)
+Vec3 Vec3::cross (Vec3 b)
 {
         return Vec3 (this->y * b.z - this->z * b.y, this->z * b.x - this->x * b.z, this->x * b.y - this->y * b.x);
 }
@@ -144,9 +149,12 @@ Vec3 Vec3::refract (Vec3 n, double mu)
         return perp + parallel;
 }
 
+Vec3 Vec3::elem_mul (Vec3 b)
+{
+        return Vec3 (this->x * b.x, this->y * b.y, this->z * b.z);
+}
 
-Vec3 Vec3::elem_mul(Vec3 b) {
-
-
-        return Vec3(this->x * b.x, this->y * b.y, this->z * b.z);
+Vec3 Vec3::zero ()
+{
+        return Vec3 (0, 0, 0);
 }

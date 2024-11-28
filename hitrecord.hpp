@@ -14,4 +14,5 @@ class HitRecord {
         Vec3 uv;
         bool front_face;
         void setNormal(Ray r, Vec3 normal);
+        Vec3 outward_normal();
 };

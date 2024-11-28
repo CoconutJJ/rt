@@ -14,10 +14,13 @@ rt: *.cpp *.hpp
 		ray.cpp \
 		plane.cpp \
 		sphere.cpp \
+		quad.cpp \
 		vec3.cpp \
 		world.cpp \
 		main.cpp \
 		dielectric.cpp \
 		phong.cpp \
 		light.cpp \
+		quad_light.cpp \
+		point_light.cpp \
 		utils.cpp -o rt

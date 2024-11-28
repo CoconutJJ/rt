@@ -18,3 +18,8 @@ void HitRecord::setNormal (Ray r, Vec3 outward_normal)
 
         this->normal = opposing_normal.unit ();
 }
+
+Vec3 HitRecord::outward_normal ()
+{
+        return this->front_face ? this->normal : -this->normal;
+}

@@ -18,3 +18,13 @@ Vec3 Object::location_at_time (double time)
 {
         return this->displacement.at (time);
 }
+
+bool Object::is_light_source ()
+{
+        return false;
+}
+
+Material *Object::material ()
+{
+        return this->mat;
+}

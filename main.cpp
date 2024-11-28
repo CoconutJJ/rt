@@ -6,7 +6,12 @@
 #include "metal.hpp"
 #include "phong.hpp"
 #include "plane.hpp"
+#include "point_light.hpp"
+#include "quad.hpp"
+#include "quad_light.hpp"
+#include "solid_texture.hpp"
 #include "sphere.hpp"
+#include "texture.hpp"
 #include "usage.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
@@ -30,7 +35,7 @@ int main (int argc, char **argv)
         char *filename = NULL;
 
         int image_width = -1, nthreads = 1;
-        double aspect_ratio = 16.0 / 9.0, vfov = 90.0, defocus_angle = 0.0, focus_dist = 1.0;
+        double aspect_ratio = 16.0 / 9.0, vfov = 90.0, defocus_angle = 0.0, focus_dist = 1.0, arealight_samples = 2;
 
         struct option longopts[] = {
                 { .name = "out_file", .has_arg = 1, .val = 'f' },
@@ -41,6 +46,7 @@ int main (int argc, char **argv)
                 { .name = "focus_dist", .has_arg = 1, .val = 'd' },
                 { .name = "help", .has_arg = 0, .val = 'h' },
                 { .name = "nthreads", .has_arg = 1, .val = 'n' },
+                { .name = "arealight_samples", .has_arg = 1, .val = 'a' },
                 { 0 }
         };
         while ((c = getopt_long (argc, argv, "f:w:", longopts, &optidx)) != -1) {
@@ -77,12 +83,17 @@ int main (int argc, char **argv)
                         nthreads = strtol (optarg, NULL, 10);
                         break;
                 }
+                case 'a': {
+                        arealight_samples = strtol (optarg, NULL, 10);
+                        break;
+                }
                 case 'h': {
                         usage ();
                         exit (EXIT_SUCCESS);
                 }
                 }
         }
+        std::cout << "rt: a ray tracer\n";
 
         if (!filename) {
                 std::cerr << "Must provide --out_file | -f argument.\n";
@@ -97,41 +108,51 @@ int main (int argc, char **argv)
         }
 
         Camera camera;
-        camera.initialize (aspect_ratio, image_width, vfov);
+        camera.initialize (aspect_ratio, image_width, vfov, defocus_angle, arealight_samples);
 
         World world;
         ImageTexture earth_texture ("earthmap.jpg");
-        Lambertian lamb (Vec3 (0.8, 0.8, 0.0));
-        Lambertian lamb2 (&earth_texture);
-        Metal metal (Vec3 (0.7, 0.6, 0.5), 0.1);
-        Dielectric glass (1.5);
 
-        Light light (Vec3 (-1, 5, -0.5), Vec3 (0.8, 0.8, 0.8), Vec3 (0.8, 0.8, 0.8));
-        Light light2 (Vec3 (2, 5, -0.5), Vec3 (0.8, 0.8, 0.8), Vec3 (0.8, 0.8, 0.8));
-        Phong phong (&world, Vec3 (1, 0.1, 0.1), camera.center, 5, 5, 0.7, 200);
-        Phong phong2 (&world, Vec3 (0.1, 1, 0.1), camera.center, 2, 2, 0.1, 256);
+        SolidTexture white (Vec3 (1, 1, 1));
+        Phong light_material (1, 1, 1, 0, 0, &white);
 
-        phong.add_light (&light);
-        phong2.add_light (&light);
+        Quad q (Vec3 (0, 0, 1), Vec3 (0, 2, 0), Vec3 (2, 0, 0), &light_material);
 
-        Plane p (Vec3 (0, -0.5, 0), Vec3 (0, 1, 0), &phong2);
-        // Sphere sp (Vec3 (-1.0, 0.0, -1.0), 0.5, &metal);
-        Sphere sp3 (Vec3 (0.0, 0.0, -1.2), 0.5, &phong);
-        // Sphere sp2 (Vec3 (1.0, 0.0, -1.0), 0.5, &glass);
-        // Sphere ground (Vec3 (0, -100.5, -1.5), 100, &lamb);
+        PointLight light (Vec3 (0, 1, 0), Vec3 (1, 1, 1), Vec3 (1, 1, 1));
+        QuadLight qlight (&q);
+        SolidTexture pink (Vec3 (1, 0.1, 0.1));
+        SolidTexture yellow (Vec3 (0.76, 0.76, 0.16));
+        SolidTexture blue (Vec3 (0.2, 0.2, 0.9));
+        SolidTexture yellow_floor (Vec3 (0.2, 0.9, 0.2));
 
-        // world.add (&sp);
-        // world.add (&sp2);
-        world.add (&sp3);
-        world.add (&p);
-        // world.add (&ground);
+        Phong pink_material (5, 2, 0.4, 0.1, 200, &earth_texture);
+        Phong yellow_material (5, 2, 0.4, 0.1, 100, &yellow);
+        Phong backgroud_material (1.5, 0.5, 0.1, 0.1, 1, &blue);
+        Phong floor_material (1.5, 1.5, 0.1, 0, 1, &yellow_floor);
 
-        if (nthreads > 1)
-                camera.render_multithreaded (&world, filename, 4);
-        else if (nthreads < 0)
-                camera.render_multithreaded (&world, filename, std::thread::hardware_concurrency ());
-        else
+        Plane background (Vec3 (0, 0, -2), Vec3 (0, 0, 1), &backgroud_material);
+        Plane floor (Vec3 (0, -1, 0), Vec3 (0, 1, 0), &floor_material);
+
+        Sphere sp1 (Vec3 (-1.0, 0.0, -1.2), 0.5, &pink_material);
+        Sphere sp2 (Vec3 (1.0, 0.0, -1.2), 0.5, &yellow_material);
+
+        world.add_light ((Light *)&light);
+        // world.add_light ((Light *)&qlight);
+        world.add (&sp1);
+        world.add (&sp2);
+        world.add (&background);
+        world.add (&floor);
+        // world.add (&q);
+
+        if (nthreads < 0)
+                nthreads = std::thread::hardware_concurrency ();
+
+        if (nthreads > 1) {
+                std::cerr << "rt running on " << nthreads << " threads.\n";
+                camera.render_multithreaded (&world, filename, nthreads);
+        } else {
                 camera.render (&world, filename);
+        }
 
         return 0;
 }

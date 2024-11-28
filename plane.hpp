@@ -3,8 +3,10 @@
 #include "vec3.hpp"
 class Plane : public Object {
     public:
-        Vec3 normal;
-        Plane(Vec3 location, Vec3 norma, Material *material);
+        Vec3 normal,u,v;
+        Plane(Vec3 location, Vec3 normal, Material *material);
 
-        virtual bool hit(Ray r, HitRecord &record) override;
+        bool hit(Ray r, HitRecord &record) override;
+        Vec3 to_texture_uv (Vec3 point);
+
 };
