@@ -1,7 +1,7 @@
 #include "camera.hpp"
 #include "light.hpp"
 #include "material.hpp"
-#include "progressbar.hpp"
+#include "progress_bar.hpp"
 #include "ray.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"

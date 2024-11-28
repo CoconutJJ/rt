@@ -1,0 +1,354 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "texture/texture.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/texture/texture.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "texture/solid_texture.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/texture/solid_texture.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "texture/image_texture.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/texture/image_texture.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "world/camera.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/world/camera.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "world/world.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/world/world.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "material/material.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/material/material.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "material/phong.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/material/phong.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "material/lambertian.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/material/lambertian.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "material/metal.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/material/metal.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "material/dielectric.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/material/dielectric.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "object/object.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/object/object.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "object/plane.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/object/plane.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "object/sphere.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/object/sphere.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "object/quad.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/object/quad.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "light/light.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/light/light.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "light/quad_light.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/light/quad_light.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "light/point_light.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/light/point_light.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "hitrecord.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/hitrecord.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "ray.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/ray.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "vec3.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/vec3.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "main.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/main.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-O3",
+      "-flto",
+      "-std=c++20",
+      "-Iinclude/",
+      "-o",
+      "rt",
+      "utils.cpp"
+    ],
+    "directory": "/Users/david/Documents/Programming/scripts/rt",
+    "file": "/Users/david/Documents/Programming/scripts/rt/utils.cpp",
+    "output": "/Users/david/Documents/Programming/scripts/rt/rt"
+  }
+]

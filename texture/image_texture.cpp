@@ -2,7 +2,7 @@
 #include <cmath>
 #define STB_IMAGE_IMPLEMENTATION
 #include "image_texture.hpp"
-#include "stb_image.h"
+#include "stb_image.hpp"
 
 ImageTexture::ImageTexture (const char *image_filename)
 {
