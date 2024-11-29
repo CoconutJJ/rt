@@ -7,4 +7,5 @@ class SolidTexture : public Texture {
         SolidTexture (Vec3 color);
         Vec3 color;
         Vec3 read_texture_uv (Vec3 uv) override;
+        Vec3 read_rgb255(Vec3 uv) override;
 };

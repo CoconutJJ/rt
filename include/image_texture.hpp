@@ -18,4 +18,5 @@ class ImageTexture : public Texture {
 
         ImageTexture (const char *image_filename);
         Vec3 read_texture_uv (Vec3 uv) override;
+        Vec3 read_rgb255(Vec3 uv) override;
 };

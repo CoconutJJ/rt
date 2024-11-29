@@ -49,12 +49,22 @@ bool Quad::hit (Ray r, HitRecord &record)
         record.lambda = lambda;
         record.mat = this->mat;
         record.uv = uv;
-        record.setNormal (r, normal);
+        record.setNormal (r, this->mapped_normal(hit_point));
 
         return true;
 }
 
-Vec3 Quad::to_texture_uv (Vec3 point)
+Vec3 Quad::tangent (Vec3 _)
+{
+        return this->v1;
+}
+
+Vec3 Quad::normal (Vec3 _)
+{
+        return this->v1.cross (-this->v2);
+}
+
+Vec3 Quad::to_uv (Vec3 point)
 {
         return find_alpha_beta (point);
 }

@@ -109,7 +109,9 @@ int main (int argc, char **argv)
         camera.initialize (aspect_ratio, image_width, vfov, defocus_angle, arealight_samples);
 
         World world;
-        ImageTexture earth_texture ("earthmap.jpg");
+        
+        ImageTexture earth_texture ("assets/earthmap.jpg");
+        ImageTexture wave_map("assets/normal_map_waves.png");
 
         SolidTexture white (Vec3 (1, 1, 1));
         Phong light_material (1, 1, 1, 0, 0, &white);
@@ -124,7 +126,7 @@ int main (int argc, char **argv)
         SolidTexture yellow_floor (Vec3 (0.2, 0.9, 0.2));
 
         Phong pink_material (5, 2, 0.4, 0.1, 200, &earth_texture);
-        Phong yellow_material (5, 2, 0.4, 0.1, 100, &yellow);
+        Phong yellow_material (5, 2, 0.4, 0.1, 100, &yellow, &wave_map);
         Phong backgroud_material (1.5, 0.5, 0.1, 0.1, 1, &blue);
         Phong floor_material (1.5, 1.5, 0.1, 0, 1, &yellow_floor);
 

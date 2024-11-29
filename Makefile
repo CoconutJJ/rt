@@ -1,5 +1,5 @@
 
-rt: **/*.cpp include/*.hpp
+rt: **/*.cpp *.cpp include/*.hpp
 	xxd -i help.txt > include/usage.hpp
 	g++ -O3 -flto -std=c++20 -Iinclude/ \
 		texture/texture.cpp \
@@ -22,5 +22,6 @@ rt: **/*.cpp include/*.hpp
 		hitrecord.cpp \
 		ray.cpp \
 		vec3.cpp \
+		mat3.cpp \
 		main.cpp \
 		utils.cpp -o rt

@@ -15,6 +15,50 @@ Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : Object 
         this->radius = radius;
 }
 
+/**
+        Computes the tangent vector given a point on the sphere in spherical
+        coordinates.
+
+        The tangent vector is oriented horizontally according to world
+        coordinates.
+
+        Spherical coordinates in our world space is:
+
+        x = p sin(phi) cos(theta),
+        y = p cos(phi),
+        z = -p sin(phi) sin(theta)
+ */
+Vec3 Sphere::tangent (double theta, double phi)
+{
+        return Vec3 (-this->radius * std::sin (phi) * std::sin (theta),
+                     0,
+                     -this->radius * std::sin (phi) * std::cos (theta))
+                .unit ();
+}
+
+Vec3 Sphere::tangent (Vec3 point)
+{
+        Vec3 sphere_coord = this->spherical_coord (point);
+
+        return this->tangent (sphere_coord.y, sphere_coord.z);
+}
+
+Vec3 Sphere::normal (Vec3 point)
+{
+        return (point - this->location).unit ();
+}
+
+Vec3 Sphere::spherical_coord (Vec3 point)
+{
+        point = point - this->location;
+
+        double theta = this->argument (-point.z, point.x);
+
+        double phi = std::acos (point.y / point.length ());
+
+        return Vec3 (point.length (), theta, phi);
+}
+
 bool Sphere::hit (Ray r, HitRecord &record)
 {
         Vec3 current_center = this->location_at_time (r.time);
@@ -36,11 +80,11 @@ bool Sphere::hit (Ray r, HitRecord &record)
                 if (record.lambda < 0)
                         return false;
         }
-
+        
         record.hit_point = r.at (record.lambda);
-        record.setNormal (r, (record.hit_point - this->location));
+        record.setNormal (r, this->mapped_normal(record.hit_point));
         record.mat = this->mat;
-        record.uv = this->to_texture_uv (record.hit_point);
+        record.uv = this->to_uv (record.hit_point);
         return true;
 }
 
@@ -58,13 +102,12 @@ double Sphere::argument (double y_opp, double x_adj)
         else
                 return 2 * M_PI - std::atan (y / x);
 }
-Vec3 Sphere::to_texture_uv (Vec3 point)
+Vec3 Sphere::to_uv (Vec3 point)
 {
-        point = point - this->location;
+        Vec3 sphere_coord = this->spherical_coord (point);
 
-        double theta = this->argument (-point.z, point.x);
-
-        double phi = std::acos (point.y / point.length ());
+        double theta = sphere_coord.y;
+        double phi = sphere_coord.z;
 
         double v = phi / M_PI;
 

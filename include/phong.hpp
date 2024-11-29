@@ -7,7 +7,9 @@
 
 class Phong : public Material {
     public:
+        Phong (double rs, double rd, double ra, double rg, double shininess, Texture *texture, Texture *normal_map);
         Phong (double rs, double rd, double ra, double rg, double shininess, Texture *texture);
+
         World *world;
         Vec3 camera_location;
         double rs, rd, ra, rg, shininess;

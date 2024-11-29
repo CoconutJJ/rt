@@ -97,7 +97,7 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
 
                         if (world->has_path (record.hit_point, point)) {
                                 diffuse_component += light->diffuse_intensity (point) *
-                                                     std::max (0.0, light_direction.dot (record.outward_normal ())) / K;
+                                                     std::max (0.0, light_direction.dot (record.normal)) / K;
                                 Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
                                 specular_component +=

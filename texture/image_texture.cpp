@@ -13,10 +13,14 @@ ImageTexture::ImageTexture (const char *image_filename)
 
 Vec3 ImageTexture::read_texture_uv (Vec3 uv)
 {
+        return this->read_rgb255(uv) / 255.0;
+}
+
+Vec3 ImageTexture::read_rgb255(Vec3 uv) {
         int u = int (std::floor (uv.x * image_width));
         int v = int (std::floor (uv.y * image_height));
 
         struct rgb_pixel pixel = this->pixels[v * image_width + u];
 
-        return Vec3 (pixel.red / 255.0, pixel.green / 255.0, pixel.blue / 255.0);
+        return Vec3 (pixel.red, pixel.green, pixel.blue);
 }
