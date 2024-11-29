@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rf *.ppm .cache *.dSYM build 2> /dev/null
+

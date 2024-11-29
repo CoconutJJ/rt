@@ -19,7 +19,7 @@ class Material {
                 double rd;
                 double rg;
                 double alpha;
-                // double gamma;
+                double gamma;
                 Vec3 color;
         };
 
@@ -30,7 +30,7 @@ class Material {
 
         virtual PhongParams phong (Ray r, HitRecord &record)
         {
-                return PhongParams{ 0, 0, 0, 0, 0, Vec3 (0, 0, 0) };
+                return PhongParams{ 0, 0, 0, 0, 0, 0, Vec3 (0, 0, 0) };
         };
 
         virtual Vec3 normal (Mat3 tbn, Vec3 n, Vec3 uv);
