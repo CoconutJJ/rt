@@ -109,9 +109,9 @@ int main (int argc, char **argv)
         camera.initialize (aspect_ratio, image_width, vfov, defocus_angle, arealight_samples);
 
         World world;
-        
+
         ImageTexture earth_texture ("assets/earthmap.jpg");
-        ImageTexture wave_map("assets/normal_map_waves.png");
+        ImageTexture wave_map ("assets/normal_map_waves.png");
 
         SolidTexture white (Vec3 (1, 1, 1));
         Phong light_material (1, 1, 1, 0, 0, &white);

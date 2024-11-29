@@ -8,6 +8,6 @@ class Plane : public Object {
 
         bool hit (Ray r, HitRecord &record) override;
         Vec3 to_uv (Vec3 point) override;
-        Vec3 tangent(Vec3 point) override;
-        Vec3 normal(Vec3 point) override;
+        Vec3 tangent (Vec3 point) override;
+        Vec3 normal (Vec3 point) override;
 };

@@ -37,7 +37,7 @@ Vec3 Plane::to_uv (Vec3 point)
 
 Vec3 Plane::tangent (Vec3 point)
 {
-        throw std::logic_error("Not implemented!");
+        throw std::logic_error ("Not implemented!");
 }
 
 Vec3 Plane::normal (Vec3 point)
@@ -61,7 +61,7 @@ bool Plane::hit (Ray r, HitRecord &record)
         record.hit_point = r.at (t);
         record.lambda = t;
         record.mat = this->mat;
-        record.setNormal (r, this->mapped_normal(record.hit_point));
+        record.setNormal (r, this->mapped_normal (record.hit_point));
 
         return true;
 }

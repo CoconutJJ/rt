@@ -10,7 +10,7 @@ Vec3 SolidTexture::read_texture_uv (Vec3 _)
         return this->color;
 }
 
-Vec3 SolidTexture::read_rgb255(Vec3 _)
+Vec3 SolidTexture::read_rgb255 (Vec3 _)
 {
         return this->color * 255.999;
 }

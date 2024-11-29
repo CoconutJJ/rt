@@ -6,3 +6,5 @@ rt
 a.out
 *.scene
 .cache
+build/
+bin/

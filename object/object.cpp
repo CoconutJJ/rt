@@ -32,13 +32,16 @@ Material *Object::material ()
 
 Vec3 Object::mapped_normal (Vec3 point)
 {
-
         if (!this->mat->normal_map)
-                return this->normal(point);
+                return this->normal (point);
 
-        return this->mat->normal(this->tbn(point), this->normal(point), this->to_uv(point));
+        return this->mat->normal (this->tbn (point), this->normal (point), this->to_uv (point));
 }
-
+/**
+        Tangent, BiTangent & Normal Matrix:
+        This matrix converts tangent space into world space
+        It assumes that +z is the tangent direction.
+ */
 Mat3 Object::tbn (Vec3 point)
 {
         Vec3 tangent = this->tangent (point);

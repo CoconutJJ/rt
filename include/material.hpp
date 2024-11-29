@@ -33,5 +33,5 @@ class Material {
                 return PhongParams{ 0, 0, 0, 0, 0, Vec3 (0, 0, 0) };
         };
 
-        virtual Vec3 normal(Mat3 tbn, Vec3 n, Vec3 uv);
+        virtual Vec3 normal (Mat3 tbn, Vec3 n, Vec3 uv);
 };

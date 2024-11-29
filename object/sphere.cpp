@@ -27,6 +27,14 @@ Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : Object 
         x = p sin(phi) cos(theta),
         y = p cos(phi),
         z = -p sin(phi) sin(theta)
+
+        Our coordinate system:
+
+        +y   -z
+        |   /
+        |  /
+        | /
+        |/_______ +x
  */
 Vec3 Sphere::tangent (double theta, double phi)
 {
@@ -80,9 +88,9 @@ bool Sphere::hit (Ray r, HitRecord &record)
                 if (record.lambda < 0)
                         return false;
         }
-        
+
         record.hit_point = r.at (record.lambda);
-        record.setNormal (r, this->mapped_normal(record.hit_point));
+        record.setNormal (r, this->mapped_normal (record.hit_point));
         record.mat = this->mat;
         record.uv = this->to_uv (record.hit_point);
         return true;

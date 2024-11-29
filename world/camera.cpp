@@ -7,6 +7,7 @@
 #include "vec3.hpp"
 #include "world.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -192,18 +193,27 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         }
         progressbar bar (image_height);
 
+        auto start_time = std::chrono::high_resolution_clock::now ();
+
         for (int p = 0; p < image_height; p++) {
                 progress.acquire ();
                 bar.update ();
         }
-
+        std::cerr << "\n";
+        
         for (std::thread &t : threads)
                 t.join ();
+
+        auto end_time = std::chrono::high_resolution_clock::now ();
+
+        int time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
 
         for (Vec3 &pixel_color : pixels)
                 this->write_color (pixel_color);
 
         file_stream.close ();
+
+        std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
 }
 
 void Camera::render (World *world, const char *filename)

@@ -1,5 +1,9 @@
 #include "vec3.hpp"
+#include <cerrno>
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "image_texture.hpp"
 #include "stb_image.hpp"
@@ -9,14 +13,20 @@ ImageTexture::ImageTexture (const char *image_filename)
         int width, height, n;
         this->pixels = (struct rgb_pixel *)stbi_load (
                 image_filename, &this->image_width, &this->image_height, &this->image_channels, 3);
+
+        if (!this->pixels) {
+                std::cout << "Attempting to load texture " << image_filename << " failed: " << strerror(errno);
+                exit (EXIT_FAILURE);
+        }
 }
 
 Vec3 ImageTexture::read_texture_uv (Vec3 uv)
 {
-        return this->read_rgb255(uv) / 255.0;
+        return this->read_rgb255 (uv) / 255.0;
 }
 
-Vec3 ImageTexture::read_rgb255(Vec3 uv) {
+Vec3 ImageTexture::read_rgb255 (Vec3 uv)
+{
         int u = int (std::floor (uv.x * image_width));
         int v = int (std::floor (uv.y * image_height));
 

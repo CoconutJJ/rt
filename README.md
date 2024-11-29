@@ -14,6 +14,22 @@ Still need to add:
 - Bump/Normal Maps
 - 
 
+## How to run
+
+To compile `rt`, run the following commands
+
+```
+$ chmod u+x BUILD.sh
+$ ./BUILD.sh
+$ ./bin/rt ...
+```
+In order to test the normal maps, I also created a tool that converts height 
+maps to normal maps. It will also be compiled when you run `BUILD.sh`. To use
+this conversion tool, run:
+```
+$ ./bin/height_map_conv ...
+```
+
 ## Knowledge Resources
 
 I first started by following this [online book](https://raytracing.github.io/),
