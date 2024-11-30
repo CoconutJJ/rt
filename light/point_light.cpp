@@ -2,7 +2,7 @@
 #include "light.hpp"
 #include "vec3.hpp"
 
-PointLight::PointLight (Vec3 point, Vec3 Id, Vec3 Is) : point (point), Id (Id), Is (Is), Light ()
+PointLight::PointLight (Vec3 point, Vec3 Id, Vec3 Is) : Light (), point (point), Id (Id), Is (Is)
 {
 }
 

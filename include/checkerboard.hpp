@@ -1,11 +1,10 @@
 #pragma once
-
 #include "texture.hpp"
 #include "vec3.hpp"
-class SolidTexture : public Texture {
+class CheckerboardTexture : public Texture {
     public:
-        SolidTexture (Vec3 color);
-        Vec3 color;
+        CheckerboardTexture (Vec3 even_color, Vec3 odd_color);
+        Vec3 even_color, odd_color;
         Vec3 read_texture_uv (Vec3 uv, Vec3 point) override;
         Vec3 read_rgb255 (Vec3 uv) override;
 };

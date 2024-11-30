@@ -3,8 +3,9 @@
 #include "object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
+#include <algorithm>
 
-QuadLight::QuadLight (Quad *quad) : quad (quad), Light ((Object *)quad)
+QuadLight::QuadLight (Quad *quad) : Light ((Object *)quad), quad (quad)
 {
 }
 
@@ -22,7 +23,7 @@ Vec3 QuadLight::diffuse_intensity (Vec3 point)
 {
         Vec3 uv = this->quad->to_uv (point);
 
-        return this->quad->material ()->texture->read_texture_uv (uv);
+        return this->quad->material ()->texture->read_texture_uv (uv, point);
 }
 
 Vec3 QuadLight::specular_intensity (Vec3 point)

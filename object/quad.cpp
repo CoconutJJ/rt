@@ -71,5 +71,5 @@ Vec3 Quad::to_uv (Vec3 point)
 
 Vec3 Quad::get_point (double alpha, double beta)
 {
-        return this->v1 * alpha + this->v2 * beta;
+        return this->location + this->v1 * alpha + this->v2 * beta;
 }

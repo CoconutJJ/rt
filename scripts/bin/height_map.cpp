@@ -28,7 +28,8 @@ double pixel_height (struct pixel p)
         return (px / 255.0).length ();
 }
 
-void usage() {
+void usage ()
+{
         std::cerr << "usage: heightmapconv -f | --map [FILENAME] -e | --epsilon [EPSILON]\n";
         std::cerr << "FILENAME: height map file\n";
         std::cerr << "EPSILON: height map step size\n";
@@ -52,15 +53,15 @@ int main (int argc, char **argv)
                 case 'f': filename = optarg; break;
                 case 'e': eps = strtod (optarg, NULL); break;
                 case 'h': {
-                        usage();
-                        exit(EXIT_SUCCESS);
+                        usage ();
+                        exit (EXIT_SUCCESS);
                 }
                 }
         }
 
         if (!filename) {
                 std::cerr << "No height map given\n";
-                usage();
+                usage ();
                 exit (EXIT_FAILURE);
         }
 

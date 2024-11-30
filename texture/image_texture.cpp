@@ -15,12 +15,12 @@ ImageTexture::ImageTexture (const char *image_filename)
                 image_filename, &this->image_width, &this->image_height, &this->image_channels, 3);
 
         if (!this->pixels) {
-                std::cout << "Attempting to load texture " << image_filename << " failed: " << strerror(errno);
+                std::cout << "Attempting to load texture " << image_filename << " failed: " << strerror (errno);
                 exit (EXIT_FAILURE);
         }
 }
 
-Vec3 ImageTexture::read_texture_uv (Vec3 uv)
+Vec3 ImageTexture::read_texture_uv (Vec3 uv, Vec3 point)
 {
         return this->read_rgb255 (uv) / 255.0;
 }

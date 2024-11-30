@@ -7,11 +7,19 @@
 
 class Phong : public Material {
     public:
-        Phong (double rs, double rd, double ra, double rg, double shininess, Texture *texture, Texture *normal_map);
-        Phong (double rs, double rd, double ra, double rg, double shininess, Texture *texture);
+        Phong (double rs,
+               double rd,
+               double ra,
+               double rg,
+               double shininess,
+               double gamma,
+               double mu,
+               Texture *texture,
+               Texture *normal_map);
+        Phong (double rs, double rd, double ra, double rg, double shininess, double gamma, double mu, Texture *texture);
 
         World *world;
         Vec3 camera_location;
-        double rs, rd, ra, rg, shininess;
+        double rs, rd, ra, rg, shininess, gamma, mu;
         PhongParams phong (Ray r, HitRecord &record) override;
 };

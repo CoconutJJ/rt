@@ -77,5 +77,5 @@ bool World::has_path (Vec3 a, Vec3 b)
         if (!this->hit (r, rec))
                 return true;
 
-        return rec.lambda > (b - a).length ();
+        return rec.lambda > (b - a).length () - 0.001;
 }

@@ -3,7 +3,7 @@
 #include "light.hpp"
 #include "quad.hpp"
 #include "vec3.hpp"
-class QuadLight : Light {
+class QuadLight : public Light {
     public:
         Quad *quad;
         QuadLight (Quad *quad);

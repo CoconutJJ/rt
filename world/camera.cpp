@@ -26,8 +26,8 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov, doub
 {
         this->aspect_ratio = aspect_ratio;
         this->image_width = image_width;
-        this->lookat = Vec3 (0, 0, 3);
-        this->center = Vec3 (0, 0, 4);
+        this->lookat = Vec3 (0, 0, -5);
+        this->center = Vec3 (0, 3, 0);
         this->defocus_angle = defocus_angle;
         this->focus_dist = 1;
         Vec3 w = (this->center - this->lookat).unit ();
@@ -36,7 +36,7 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov, doub
         Vec3 v = w.cross (u);
 
         this->vfov = vfov;
-        this->max_depth = 80;
+        this->max_depth = 5;
         this->samples_per_pixel = 150;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
@@ -78,7 +78,6 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
 {
         Vec3 to_camera = (this->center - record.hit_point).unit ();
         Vec3 diffuse_component (0, 0, 0), specular_component (0, 0, 0);
-
         if (light->is_point_light ()) {
                 Vec3 point = light->sample_point ();
                 Vec3 light_direction = (point - record.hit_point).unit ();
@@ -110,7 +109,6 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
 
         diffuse_component *= params.rd;
         specular_component *= params.rs;
-
         return diffuse_component + specular_component;
 }
 
@@ -131,12 +129,16 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
         for (Light *light_source : world->lights)
                 radiance += this->sample_light_rays (world, record, light_source, params, this->arealight_samples);
 
+        radiance *= params.gamma;
+
         Vec3 color = radiance.elem_mul (params.color);
 
         Vec3 normal = record.normal;
-        Ray scatter (record.hit_point, r.direction.reflect (normal).unit ());
+        Ray refraction (record.hit_point, r.direction.refract (record.normal, params.mu));
+        color += this->ray_color (refraction, world, depth - 1) * (1 - params.gamma);
 
-        color += this->ray_color (scatter, world, depth - 1) * params.rg;
+        Ray specular_reflection (record.hit_point, r.direction.reflect (normal).unit ());
+        color += this->ray_color (specular_reflection, world, depth - 1) * params.rg;
 
         return color.clamp (0, 1);
 }
@@ -200,7 +202,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                 bar.update ();
         }
         std::cerr << "\n";
-        
+
         for (std::thread &t : threads)
                 t.join ();
 
