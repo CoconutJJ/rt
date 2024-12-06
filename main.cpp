@@ -2,7 +2,6 @@
 #include "checkerboard.hpp"
 #include "image_texture.hpp"
 #include "lambertian.hpp"
-#include "light.hpp"
 #include "metal.hpp"
 #include "phong.hpp"
 #include "plane.hpp"
@@ -31,7 +30,7 @@ int main (int argc, char **argv)
 {
         int c, optidx = 0;
 
-        char *filename = NULL;
+        char *filename = NULL, *scene_file = NULL;
 
         int image_width = -1, nthreads = -1;
         double aspect_ratio = 16.0 / 9.0, vfov = 90.0, defocus_angle = 0.0, arealight_samples = 2;
@@ -45,6 +44,7 @@ int main (int argc, char **argv)
                 { .name = "help", .has_arg = 0, .val = 'h' },
                 { .name = "nthreads", .has_arg = 1, .val = 'n' },
                 { .name = "arealight_samples", .has_arg = 1, .val = 'a' },
+                { .name = "scene_file", .has_arg = 1, .val = 'i' },
                 { 0 }
         };
         while ((c = getopt_long (argc, argv, "f:w:", longopts, &optidx)) != -1) {
@@ -64,7 +64,10 @@ int main (int argc, char **argv)
                         aspect_ratio = width / height;
                         break;
                 }
-
+                case 'i': {
+                        scene_file = optarg;
+                        break;
+                }
                 case 'v': {
                         vfov = strtod (optarg, NULL);
                         break;
@@ -101,43 +104,49 @@ int main (int argc, char **argv)
                 exit (EXIT_FAILURE);
         }
 
+        // SceneFile s((std::string(scene_file)));
+
         Camera camera;
         camera.initialize (aspect_ratio, image_width, vfov, defocus_angle, arealight_samples);
 
         World world;
+        PointLight light (Vec3 (0, 1, -1), Vec3 (1, 1, 1), Vec3 (1, 1, 1));
 
-        ImageTexture earth_texture ("assets/earthmap.jpg");
-        ImageTexture wave_map ("assets/normal_map_waves.png");
-
-        CheckerboardTexture checkers (Vec3 (0.5, 0.5, 0.5), Vec3 (1, 1, 1));
-        Phong floor_material (1, 0.5, 0.1, 0.1, 1, 1, 0, &checkers);
-        Plane floor (Vec3 (0, -1, 0), Vec3 (0, 1, 0), &floor_material);
+        // ImageTexture earth_texture ("assets/earthmap.jpg");
+        // ImageTexture wave_map ("assets/normal_map_waves.png");
 
         SolidTexture white (Vec3 (1, 1, 1));
-        Phong white_light (1, 1, 1, 0, 0, 1, 0, &white);
-        Phong glass_material (10, 2, 0.4, 0.1, 256, 0, 0.5, &white);
+        SolidTexture blue (Vec3 (0.01, 0.01, 1));
 
-        Sphere sp1 (Vec3 (0, 0.0, -0.5), 0.5, &glass_material);
+        Phong background (1, 0.5, 1, 0.01, 0, 1, 0, &blue);
 
-        PointLight light (Vec3 (0, 1, 0), Vec3 (1, 1, 1), Vec3 (1, 1, 1), Vec3 (1, 1, 1));
+        Phong glass (2, 0.5, 1, 0.03, 100, 0, 0.01, &white);
 
-        SolidTexture blue (Vec3 (0.1, 0.1, 1));
+        // Phong earth_background (1, 1, 1, 0.1, 50, 1, 0, &earth_texture);
+        Plane backdrop (Vec3 (0, 0, -5), Vec3 (0, 0, 1), &background);
 
-        Phong blue_ball (10, 3, 0.2, 0.01, 100, 1, 0.5, &blue);
+        
+        SolidTexture light_t(Vec3(0.5, 0.5, 0.5));
+        Phong light_panel_mat (1, 1, 1, 0, 0, 1, 0, &light_t);
+        Quad light_panel (Vec3 (-0.5, 3, -2), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light_panel_mat);
+        QuadLight q (&light_panel);
 
-        Quad q (Vec3 (0, 2, -5.5), Vec3 (0, -0.1, -1), Vec3 (1, 0, 0), &white_light);
-        QuadLight qlight (&q);
 
-        for (int i = 0; i < 5; i++) {
-                Sphere *s = new Sphere (Vec3 (-1 + i * 1, -0.5, -6), 0.5, &blue_ball);
+        CheckerboardTexture checkers (Vec3 (0.01, 0.01, 0.01), Vec3 (1, 1, 1));
+        Phong floor_material (0.2, 0.6, 0.3, 0.3, 0, 1, 0, &checkers);
+        Sphere planet (Vec3 (0, -100.5, 0), 100, &floor_material);
+        
+        Sphere obj (Vec3 (0, 0.5, -2), 0.5, &glass);
+        // world.add (&backdrop);
+        // world.add(&background_plane);
+        world.add (&obj);
+        // world.add_light (&light);
+        world.add (&planet);
+        world.add_light (&q);
+        world.add (&light_panel);
 
-                world.add (s);
-        }
-
-        world.add_light (&qlight);
-
-        world.add (&floor);
-        world.add (&q);
+        // std::cerr << "Computing Photon mapping...\n";
+        // world.photon_map_forward_pass();
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();

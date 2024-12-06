@@ -26,8 +26,8 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov, doub
 {
         this->aspect_ratio = aspect_ratio;
         this->image_width = image_width;
-        this->lookat = Vec3 (0, 0, -5);
-        this->center = Vec3 (0, 3, 0);
+        this->lookat = Vec3 (0, 0, -1);
+        this->center = Vec3 (0, 0, 0);
         this->defocus_angle = defocus_angle;
         this->focus_dist = 1;
         Vec3 w = (this->center - this->lookat).unit ();
@@ -36,7 +36,7 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov, doub
         Vec3 v = w.cross (u);
 
         this->vfov = vfov;
-        this->max_depth = 5;
+        this->max_depth = 10;
         this->samples_per_pixel = 150;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
@@ -86,8 +86,13 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                 if (world->has_path (record.hit_point, point)) {
                         diffuse_component =
                                 light->diffuse_intensity (point) * std::max (0.0, light_direction.dot (record.normal));
+                        // specular_component = light->specular_intensity (point) *
+                        //      std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha);
+
+                        Vec3 halfway = (to_camera + light_direction).unit ();
+
                         specular_component = light->specular_intensity (point) *
-                                             std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha);
+                                             std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha);
                 }
         } else {
                 for (int i = 0; i < K; i++) {
@@ -100,9 +105,16 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                                                      std::max (0.0, light_direction.dot (record.normal)) / K;
                                 Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
-                                specular_component +=
+                                // specular_component +=
+                                //         light->specular_intensity (point) *
+                                //         std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha) /
+                                //         K;
+
+                                Vec3 halfway = (to_camera + light_direction).unit ();
+
+                                specular_component =
                                         light->specular_intensity (point) *
-                                        std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha) / K;
+                                        std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha) / K;
                         }
                 }
         }

@@ -2,8 +2,9 @@
 #include "utils.hpp"
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
-Vec3::Vec3 ()
+Vec3::Vec3 () : x (0), y (0), z (0)
 {
 }
 
@@ -143,10 +144,11 @@ bool Vec3::near_zero ()
 
 Vec3 Vec3::refract (Vec3 n, double mu)
 {
-        Vec3 perp = (*this + n * (std::fmin (-(this->dot (n)), 1.0))) * mu;
-        Vec3 parallel = -n * std::sqrt (std::fabs (1.0 - perp.length_squared ()));
+        double c = -this->dot (n);
 
-        return perp + parallel;
+        Vec3 dir = *this * mu + n * (mu * c - std::sqrt (1 - mu * mu * (1 - c * c)));
+
+        return dir;
 }
 
 Vec3 Vec3::elem_mul (Vec3 b)
@@ -157,4 +159,22 @@ Vec3 Vec3::elem_mul (Vec3 b)
 Vec3 Vec3::zero ()
 {
         return Vec3 (0, 0, 0);
+}
+
+Vec3 Vec3::rotate (Vec3 axis, double angle)
+{
+        // Rodrigues' formula
+        return *this * std::cos (angle) + (axis.cross (*this)) * std::sin (angle) +
+               axis * (axis.dot (*this)) * (1 - std::cos (angle));
+}
+
+double& Vec3::operator[] (int index)
+{
+        switch (index) {
+        case 0: return this->x;
+        case 1: return this->y;
+        case 2: return this->z;
+        }
+
+        throw std::logic_error ("error: invalid dimension!");
 }
