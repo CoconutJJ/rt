@@ -9,9 +9,8 @@ Dielectric::Dielectric (double refraction_index) : refraction_index (refraction_
 {
 }
 
-bool Dielectric::scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scattered)
+Vec3 Dielectric::scatter (Ray r, HitRecord &record)
 {
-        attenuation = Vec3 (1, 1, 1);
         double mu = record.front_face ? (1 / refraction_index) : refraction_index;
         Vec3 unit_direction = r.direction.unit ();
 
@@ -24,10 +23,8 @@ bool Dielectric::scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scat
         } else {
                 direction = unit_direction.refract (record.normal, mu);
         }
-
-        scattered = Ray (record.hit_point, direction, r.time);
-
-        return true;
+        
+        return direction.sph();
 }
 
 double Dielectric::reflectance (double cosine, double refraction_index)

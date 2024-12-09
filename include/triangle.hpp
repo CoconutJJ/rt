@@ -5,7 +5,7 @@
 #include "vec3.hpp"
 
 
-class Triangle : Plane {
+class Triangle : public Plane {
 
     public:
 

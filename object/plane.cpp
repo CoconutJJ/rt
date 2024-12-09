@@ -26,6 +26,13 @@ Plane::Plane (Vec3 location, Vec3 normal, Material *material) : Object (location
         this->v = normal.cross (u).unit ();
 }
 
+Plane::Plane (Vec3 location, Vec3 u, Vec3 v, Material *material) : Object (location, material)
+{
+        this->u = u.unit ();
+        this->v = v.unit ();
+        this->n = u.cross (v);
+}
+
 Vec3 Plane::to_uv (Vec3 point)
 {
         double alpha = n.dot (v.cross (point - location)) / n.dot (v.cross (u));
@@ -45,7 +52,7 @@ Vec3 Plane::normal (Vec3 point)
         return this->n.unit ();
 }
 
-bool Plane::hit (Ray r, HitRecord &record)
+bool Plane::hit_point (Ray r, Vec3 &point, double &lambda)
 {
         double top = (this->location - r.origin).dot (this->n);
         double bottom = (r.direction.dot (this->n));
@@ -58,10 +65,19 @@ bool Plane::hit (Ray r, HitRecord &record)
         if (t < 0)
                 return false;
 
-        record.hit_point = r.at (t);
-        record.lambda = t;
+        lambda = t;
+        point = r.at (t);
+
+        return true;
+}
+
+bool Plane::hit (Ray r, HitRecord &record)
+{
+        if (!this->hit_point (r, record.hit_point, record.lambda))
+                return false;
+
         record.mat = this->mat;
         record.setNormal (r, this->mapped_normal (record.hit_point));
-
+        record.obj = this;
         return true;
 }

@@ -8,13 +8,9 @@ Metal::Metal (Vec3 albedo, double fuzz) : Material (), albedo (albedo), fuzz (fu
 {
 }
 
-bool Metal::scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scattered)
+Vec3 Metal::scatter (Ray r, HitRecord &record)
 {
         Vec3 reflect_direction = r.direction.reflect (record.normal).unit () + Vec3::random ().unit () * fuzz;
 
-        scattered = Ray (record.hit_point, reflect_direction, r.time);
-
-        attenuation = albedo;
-
-        return scattered.direction.dot (record.normal) > 0;
+        return reflect_direction.unit ().sph ();
 }

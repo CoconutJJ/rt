@@ -50,7 +50,7 @@ bool Quad::hit (Ray r, HitRecord &record)
         record.mat = this->mat;
         record.uv = uv;
         record.setNormal (r, this->mapped_normal (hit_point));
-
+        record.obj = this;
         return true;
 }
 

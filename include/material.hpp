@@ -25,9 +25,9 @@ class Material {
                 Vec3 color;
         };
 
-        virtual bool scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scattered)
+        virtual Vec3 scatter (Ray r, HitRecord &record)
         {
-                return false;
+                return Vec3(0,0,0);
         }
 
         virtual PhongParams phong (Ray r, HitRecord &record)

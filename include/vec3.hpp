@@ -19,7 +19,7 @@ class Vec3 {
         Vec3 operator-= (Vec3 b);
         Vec3 operator*= (double d);
         bool operator== (Vec3 b);
-
+        double& operator[] (int dim);
         double dot (Vec3 b);
         double length_squared ();
         double length ();
@@ -29,7 +29,11 @@ class Vec3 {
         Vec3 clamp (double min, double max);
         Vec3 reflect (Vec3 normal);
         Vec3 refract (Vec3 n, double mu);
+        Vec3 sph();
         bool near_zero ();
         static Vec3 random ();
         static Vec3 zero ();
+        Vec3 rotate(Vec3 axis, double angle);
+    private:
+        double argument(double y_opp, double x_adj);
 };

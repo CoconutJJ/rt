@@ -52,6 +52,16 @@ Mat3 Object::tbn (Vec3 point)
         return tbn;
 }
 
+Mat3 Object::tnb (Vec3 point)
+{
+        Vec3 tangent = this->tangent (point);
+        Vec3 normal = this->normal (point);
+
+        Mat3 tnb (tangent, normal, normal.cross (tangent));
+
+        return tnb;
+}
+
 Vec3 Object::tbn_transform (Vec3 point, Vec3 tangent_v)
 {
         return this->tbn (point) * tangent_v;

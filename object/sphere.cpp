@@ -93,6 +93,7 @@ bool Sphere::hit (Ray r, HitRecord &record)
         record.setNormal (r, this->mapped_normal (record.hit_point));
         record.mat = this->mat;
         record.uv = this->to_uv (record.hit_point);
+        record.obj = this;
         return true;
 }
 

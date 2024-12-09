@@ -2,14 +2,13 @@
 #include "vec3.hpp"
 #include <cstdlib>
 
-KDTree::KDTree ()
+KDTree::KDTree () : root(nullptr)
 {
 }
 
 KDTree::~KDTree ()
 {
-        if (!this->root)
-                return;
+        this->_delete_kdtree(this->root);
 }
 
 void KDTree::_delete_kdtree (struct KDTreeNode *root)
@@ -46,15 +45,7 @@ struct KDTree::KDTreeNode *KDTree::_insert_depth (struct KDTreeNode *root, Vec3 
 
 void KDTree::insert (Vec3 node)
 {
-        if (!this->root) {
-                this->root = new struct KDTreeNode;
-                this->root->left = nullptr;
-                this->root->right = nullptr;
-                this->root->value = node;
-                return;
-        }
-
-        this->_insert_depth (this->root, node, 0);
+        this->root = this->_insert_depth (this->root, node, 0);
 }
 
 Vec3 KDTree::_closest_to (Vec3 target, Vec3 a, Vec3 b)

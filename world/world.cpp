@@ -1,11 +1,16 @@
 
 #include "world.hpp"
+#include "hitrecord.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "object.hpp"
+#include "progress_bar.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
 #include <cfloat>
+#include <cmath>
+#include <utility>
+#include <vector>
 World::World ()
 {
 }
@@ -78,4 +83,88 @@ bool World::has_path (Vec3 a, Vec3 b)
                 return true;
 
         return rec.lambda > (b - a).length () - 0.001;
+}
+
+Vec3 World::photon_map_color (Vec3 point)
+{
+        Vec3 color (0, 0, 0);
+        int count = 0;
+        for (struct Photon p : this->photons) {
+                if ((p.point - point).length_squared () < 0.025) {
+                        color += p.color;
+                        count++;
+                }
+        }
+
+        if (count == 0)
+                return Vec3::zero();
+
+        return (color / count) * (double(count) / this->photons.size());
+}
+
+void World::photon_map_forward_pass ()
+{
+        int rays_per_light = 1e6;
+        int max_depth = 10;
+        progressbar bar (rays_per_light * this->lights.size ());
+
+        for (Light *light : this->lights) {
+                for (int i = 0; i < rays_per_light; i++) {
+                        Vec3 origin = light->sample_point ();
+
+                        Vec3 direction = Vec3::random ();
+
+                        Ray r (origin, direction, light->specular_intensity (origin));
+
+                        std::vector<std::pair<Ray, int> > worklist;
+                        worklist.push_back (std::pair (r, max_depth));
+
+                        while (worklist.size () > 0) {
+                                std::pair<Ray, int> item = worklist.back ();
+
+                                worklist.pop_back ();
+
+                                Ray curr_ray = item.first;
+                                int depth = item.second;
+
+                                HitRecord record;
+
+                                if (!this->hit (curr_ray, record)) {
+                                        continue;
+                                }
+
+                                Material::PhongParams params = record.mat->phong (curr_ray, record);
+
+                                if (params.gamma == 1.0) {
+                                        if (depth == max_depth)
+                                                continue;
+
+                                        struct Photon p = { .color = curr_ray.color, .point = record.hit_point };
+                                        this->photons.push_back (p);
+
+                                } else {
+                                        if (depth == 0)
+                                                continue;
+
+                                        Ray reflected = Ray (record.hit_point,
+                                                             curr_ray.direction.unit ().reflect (record.normal), curr_ray.color * params.color);
+
+                                        worklist.push_back (std::pair (reflected, depth - 1));
+
+                                        double mu = record.front_face ? params.mu : 1 / params.mu;
+
+                                        if (curr_ray.can_refract (record.normal, mu)) {
+                                                Ray refracted =
+                                                        Ray (record.hit_point,
+                                                             curr_ray.direction.unit ().refract (record.normal, mu), curr_ray.color * params.color);
+
+
+                                                worklist.push_back (std::pair (refracted, depth - 1));
+                                        }
+                                }
+                        }
+
+                        bar.update ();
+                }
+        }
 }

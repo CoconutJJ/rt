@@ -3,7 +3,7 @@
 class Metal : public Material {
     public:
         Metal (Vec3 albedo, double fuzz);
-        virtual bool scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scattered) override;
+        virtual Vec3 scatter (Ray r, HitRecord &record) override;
 
     private:
         Vec3 albedo;

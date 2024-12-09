@@ -4,8 +4,9 @@
 #include "ray.hpp"
 #include "solid_texture.hpp"
 #include "texture.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
-#include <cstddef>
+#include <cmath>
 
 Lambertian::Lambertian (Vec3 albedo) : Material ()
 {
@@ -18,16 +19,7 @@ Lambertian::Lambertian (Texture *texture) : Material (), texture (texture)
         this->texture = texture;
 }
 
-bool Lambertian::scatter (Ray r, HitRecord &record, Vec3 &attenuation, Ray &scattered)
+Vec3 Lambertian::scatter (Ray r, HitRecord &record)
 {
-        Vec3 scatter_direction = record.normal.unit () + Vec3::random ().unit ();
-
-        if (scatter_direction.near_zero ())
-                scatter_direction = record.normal;
-
-        scattered = Ray (record.hit_point, scatter_direction, r.time);
-
-        attenuation = this->texture->read_texture_uv (record.uv);
-
-        return true;
+        return Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2));
 }

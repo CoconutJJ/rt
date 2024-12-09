@@ -10,7 +10,6 @@
 
 ImageTexture::ImageTexture (const char *image_filename)
 {
-        int width, height, n;
         this->pixels = (struct rgb_pixel *)stbi_load (
                 image_filename, &this->image_width, &this->image_height, &this->image_channels, 3);
 
@@ -18,6 +17,11 @@ ImageTexture::ImageTexture (const char *image_filename)
                 std::cout << "Attempting to load texture " << image_filename << " failed: " << strerror (errno);
                 exit (EXIT_FAILURE);
         }
+}
+
+Vec3 ImageTexture::photon_map(Vec3 point) {
+
+        return Vec3::zero();
 }
 
 Vec3 ImageTexture::read_texture_uv (Vec3 uv, Vec3 point)

@@ -168,7 +168,31 @@ Vec3 Vec3::rotate (Vec3 axis, double angle)
                axis * (axis.dot (*this)) * (1 - std::cos (angle));
 }
 
-double& Vec3::operator[] (int index)
+double Vec3::argument (double y_opp, double x_adj)
+{
+        double y = std::abs (y_opp);
+        double x = std::abs (x_adj);
+
+        if (x_adj > 0 && y_opp >= 0)
+                return std::atan (y / x);
+        else if (x_adj < 0 && y_opp >= 0)
+                return M_PI - std::atan (y / x);
+        else if (x_adj < 0 && y_opp <= 0)
+                return M_PI + std::atan (y / x);
+        else
+                return 2 * M_PI - std::atan (y / x);
+}
+
+Vec3 Vec3::sph ()
+{
+        double theta = this->argument (-this->z, this->x);
+
+        double phi = std::acos (this->y / this->length ());
+
+        return Vec3 (this->length (), theta, phi);
+}
+
+double &Vec3::operator[] (int index)
 {
         switch (index) {
         case 0: return this->x;

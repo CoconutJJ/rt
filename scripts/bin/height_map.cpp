@@ -2,8 +2,8 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "progress_bar.hpp"
 #include "stb_image.hpp"
-
 #include "vec3.hpp"
 #include <cstdint>
 #include <fstream>
@@ -42,16 +42,18 @@ int main (int argc, char **argv)
         struct option longopts[] = {
                 { .name = "map", .has_arg = 1, .val = 'f' },
                 { .name = "epsilon", .has_arg = 1, .val = 'e' },
+                { .name = "outfile", .has_arg = 1, .val = 'o' },
                 { 0 }
         };
 
-        char *filename = NULL;
+        char *filename = NULL, *outfile_name = NULL;
         double eps = 1e-2;
 
-        while ((c = getopt_long (argc, argv, "hf:", longopts, &optindex)) != EOF) {
+        while ((c = getopt_long (argc, argv, "hf:o:e:", longopts, &optindex)) != EOF) {
                 switch (c) {
                 case 'f': filename = optarg; break;
                 case 'e': eps = strtod (optarg, NULL); break;
+                case 'o': outfile_name = optarg; break;
                 case 'h': {
                         usage ();
                         exit (EXIT_SUCCESS);
@@ -69,7 +71,9 @@ int main (int argc, char **argv)
 
         struct pixel *pixels = (struct pixel *)stbi_load (filename, &width, &height, &nchannels, 3);
 
-        std::ofstream file ((std::string ("out.ppm")));
+        std::ofstream file ((std::string (outfile_name)));
+
+        progressbar bar ((height - 1));
 
         file << "P3\n";
         file << width - 2 << ' ' << height - 2 << "\n";
@@ -78,6 +82,7 @@ int main (int argc, char **argv)
 #define P(i, j) pixels[(j) * width + (i)]
 
         for (int j = 1; j < height - 1; j++) {
+                bar.update ();
                 for (int i = 1; i < width - 1; i++) {
                         double x1 = pixel_height (P (i - 1, j));
                         double x2 = pixel_height (P (i + 1, j));

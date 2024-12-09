@@ -1,3 +1,5 @@
+#pragma once
+
 #include "material.hpp"
 #include "object.hpp"
 #include "vec3.hpp"
