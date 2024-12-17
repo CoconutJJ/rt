@@ -31,18 +31,20 @@ class Camera {
         std::ostream &stream;
 
         Camera ();
-        void
-        initialize (double aspect_ratio, int image_width, double vfov, double defocus_angle, int arealight_samples);
+        void initialize (double aspect_ratio,
+                         int image_width,
+                         double vfov,
+                         double defocus_angle,
+                         int arealight_samples,
+                         int samples_per_pixel);
         void render (World *world, const char *filename);
         void render_multithreaded (World *world, const char *filename, int max_threads);
-        void path_render(World *world, const char *filename);
-        
+        void path_render (World *world, const char *filename, int max_threads);
+        void set_output_file (const char *filename);
         Ray ray (int i, int j);
         Vec3 ray_color (Ray r, World *world, int depth);
         Vec3 path_color (Ray r, World *world, int depth);
         void write_color (Vec3 color);
         Vec3 sample_light_rays (World *world, HitRecord &record, Light *light, Material::PhongParams params, int K);
         Vec3 defocus_disk_sample ();
-
-
 };

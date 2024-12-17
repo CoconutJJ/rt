@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 ObjFile::ObjFile (const char *filename) : vertex_index (0), vertex_texture_index (0)
 {
         this->obj_file = fopen (filename, "r");
@@ -152,7 +151,7 @@ Vec3 ObjFile::parse_vertex ()
 
 Vec3 ObjFile::parse_vertex_normal ()
 {
-        this->consume_token(ObjFile::VERTEX_NORMAL, "expected vertex normal 'vn'");
+        this->consume_token (ObjFile::VERTEX_NORMAL, "expected vertex normal 'vn'");
 
         struct ObjFile::Token x = this->consume_token (FLOAT, "expected x-coordinate for vertex");
 
@@ -163,11 +162,7 @@ Vec3 ObjFile::parse_vertex_normal ()
         return Vec3 (x.f, y.f, z.f);
 }
 
-Triangle ObjFile::parse_face()
+Triangle ObjFile::parse_face ()
 {
-
-        this->consume_token(ObjFile::FACE, "expected face 'f'");
-
-        
-
+        this->consume_token (ObjFile::FACE, "expected face 'f'");
 }

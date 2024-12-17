@@ -23,12 +23,17 @@ Camera::Camera () : pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), 
 {
 }
 
-void Camera::initialize (double aspect_ratio, int image_width, double vfov, double defocus_angle, int arealight_samples)
+void Camera::initialize (double aspect_ratio,
+                         int image_width,
+                         double vfov,
+                         double defocus_angle,
+                         int arealight_samples,
+                         int samples_per_pixel)
 {
         this->aspect_ratio = aspect_ratio;
         this->image_width = image_width;
-        this->lookat = Vec3 (0, 0, -2);
-        this->center = Vec3 (0, 2, 0);
+        this->lookat = Vec3 (0, 0, -1);
+        this->center = Vec3 (0, 3, 2);
         this->defocus_angle = defocus_angle;
         this->focus_dist = 1;
         Vec3 w = (this->center - this->lookat).unit ();
@@ -38,7 +43,7 @@ void Camera::initialize (double aspect_ratio, int image_width, double vfov, doub
 
         this->vfov = vfov;
         this->max_depth = 5;
-        this->samples_per_pixel = 150;
+        this->samples_per_pixel = samples_per_pixel;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
         this->viewport_width = this->viewport_height * (double (this->image_width) / this->image_height);
@@ -82,21 +87,22 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
         if (light->is_point_light ()) {
                 Vec3 point = light->sample_point ();
                 Vec3 light_direction = (point - record.hit_point).unit ();
-                Vec3 mirror_direction = (-light_direction).reflect (record.normal);
+                // Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
                 if (world->has_path (record.hit_point, point)) {
                         diffuse_component =
                                 light->diffuse_intensity (point) * std::max (0.0, light_direction.dot (record.normal));
 
                         // Original Phong lighting:
-                        specular_component = light->specular_intensity (point) *
-                                             std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha);
+                        // specular_component = light->specular_intensity (point) *
+                        //                      std::pow (std::max (0.0, mirror_direction.dot (to_camera)),
+                        //                      params.alpha);
 
                         // Blinn-Phong Lighting: halfway vector
-                        // Vec3 halfway = (to_camera + light_direction).unit ();
+                        Vec3 halfway = (to_camera + light_direction).unit ();
 
-                        // specular_component = light->specular_intensity (point) *
-                        //                      std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha);
+                        specular_component = light->specular_intensity (point) *
+                                             std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha);
                 }
         } else {
                 for (int i = 0; i < K; i++) {
@@ -107,17 +113,18 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                         if (world->has_path (record.hit_point, point)) {
                                 diffuse_component += light->diffuse_intensity (point) *
                                                      std::max (0.0, light_direction.dot (record.normal)) / K;
-                                Vec3 mirror_direction = (-light_direction).reflect (record.normal);
+                                // Vec3 mirror_direction = (-light_direction).reflect (record.normal);
 
-                                specular_component +=
-                                        light->specular_intensity (point) *
-                                        std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha) / K;
-
-                                // Vec3 halfway = (to_camera + light_direction).unit ();
-
-                                // specular_component =
+                                // specular_component +=
                                 //         light->specular_intensity (point) *
-                                //         std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha) / K;
+                                //         std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha) /
+                                //         K;
+
+                                Vec3 halfway = (to_camera + light_direction).unit ();
+
+                                specular_component =
+                                        light->specular_intensity (point) *
+                                        std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha) / K;
                         }
                 }
         }
@@ -180,27 +187,102 @@ void Camera::write_color (Vec3 color)
 
 Vec3 Camera::path_color (Ray r, World *world, int depth)
 {
+        if (depth == 0)
+                return Vec3 (0, 0, 0);
+
         HitRecord record;
 
         if (!world->hit (r, record))
                 return Vec3 (0, 0, 0);
 
-        // record.mat->
+        Object *obj = record.obj;
+
+        Vec3 in_direction = r.direction;
+
+        Vec3 brdf;
+        Ray scatter_ray (record.hit_point, record.mat->scatter (r, record, brdf));
+
+        // Vec3 brdf = obj->brdf (record.hit_point, in_direction, scatter_ray.direction);
+
+        Vec3 scatter_color = this->path_color (scatter_ray, world, depth - 1);
+
+        return record.mat->emission (r, record) +
+               (scatter_color.elem_mul (brdf) * record.normal.dot (-in_direction.unit ()))
+                       .elem_mul (record.mat->color (record));
 }
 
-void Camera::path_render (World *world, const char *filename)
+void Camera::set_output_file (const char *filename)
 {
-        for (int j = 0; j < this->image_height; j++) {
-                for (int i = 0; i < this->image_width; i++) {
-                        for (int sample = 0; sample < this->samples_per_pixel; sample++) {
-                                Ray r = this->ray (i + random_double (-0.5, 0.5), j + random_double (-0.5, 0.5));
-                                
-                                
+        std::ofstream file_stream = std::ofstream (std::string (filename));
 
-                                // this->path_color(r, World *world, int depth)
+        this->stream.rdbuf (file_stream.rdbuf ());
+
+        this->stream << "P3\n"
+                     << this->image_width << ' ' << this->image_height << "\n"
+                     << "255"
+                     << "\n";
+}
+
+void Camera::path_render (World *world, const char *filename, int max_threads)
+{
+        std::ofstream file_stream = std::ofstream (std::string (filename));
+        this->stream.rdbuf (file_stream.rdbuf ());
+
+        this->stream << "P3\n"
+                     << this->image_width << ' ' << this->image_height << "\n"
+                     << "255"
+                     << "\n";
+
+        std::mutex pixel_lock;
+        std::counting_semaphore<> sem (max_threads);
+        std::counting_semaphore<> progress (0);
+        std::vector<std::thread> threads;
+        std::vector<Vec3> pixels (this->image_width * this->image_height);
+        for (int j = 0; j < this->image_height; j++) {
+                threads.push_back (std::thread ([&, j] {
+                        sem.acquire ();
+
+                        for (int i = 0; i < this->image_width; i++) {
+                                Vec3 color (0, 0, 0);
+
+                                for (int sample = 0; sample < this->samples_per_pixel; sample++) {
+                                        Ray r = this->ray (i + random_double (-0.5, 0.5),
+                                                           j + random_double (-0.5, 0.5));
+                                        color += this->path_color (r, world, this->max_depth);
+                                }
+
+                                color /= this->samples_per_pixel;
+
+                                pixel_lock.lock ();
+                                pixels[i + j * image_width] = color;
+                                pixel_lock.unlock ();
                         }
-                }
+                        sem.release ();
+                        progress.release ();
+                }));
         }
+
+        progressbar bar (image_height);
+
+        auto start_time = std::chrono::high_resolution_clock::now ();
+
+        for (int p = 0; p < image_height; p++) {
+                progress.acquire ();
+                bar.update ();
+        }
+        std::cerr << "\n";
+
+        for (std::thread &t : threads)
+                t.join ();
+
+        auto end_time = std::chrono::high_resolution_clock::now ();
+
+        int time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
+
+        for (Vec3 &pixel_color : pixels)
+                this->write_color (pixel_color);
+
+        std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
 }
 
 void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
@@ -212,7 +294,6 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                      << this->image_width << ' ' << this->image_height << "\n"
                      << "255"
                      << "\n";
-
         std::mutex pixel_lock;
         std::counting_semaphore<> sem (max_threads);
         std::counting_semaphore<> progress (0);
@@ -262,20 +343,12 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         for (Vec3 &pixel_color : pixels)
                 this->write_color (pixel_color);
 
-        file_stream.close ();
-
         std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
 }
 
 void Camera::render (World *world, const char *filename)
 {
-        std::ofstream file_stream = std::ofstream (std::string (filename));
-        this->stream.rdbuf (file_stream.rdbuf ());
-
-        this->stream << "P3\n"
-                     << this->image_width << ' ' << this->image_height << "\n"
-                     << "255"
-                     << "\n";
+        this->set_output_file (filename);
 
         progressbar bar (image_height);
 
@@ -292,6 +365,4 @@ void Camera::render (World *world, const char *filename)
                         this->write_color (pixel_color);
                 }
         }
-
-        file_stream.close ();
 }

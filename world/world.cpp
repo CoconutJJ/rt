@@ -8,9 +8,9 @@
 #include "ray.hpp"
 #include "vec3.hpp"
 #include <cfloat>
-#include <cmath>
 #include <utility>
 #include <vector>
+
 World::World ()
 {
 }
@@ -97,9 +97,9 @@ Vec3 World::photon_map_color (Vec3 point)
         }
 
         if (count == 0)
-                return Vec3::zero();
+                return Vec3::zero ();
 
-        return (color / count) * (double(count) / this->photons.size());
+        return (color / count) * (double (count) / this->photons.size ());
 }
 
 void World::photon_map_forward_pass ()
@@ -147,7 +147,8 @@ void World::photon_map_forward_pass ()
                                                 continue;
 
                                         Ray reflected = Ray (record.hit_point,
-                                                             curr_ray.direction.unit ().reflect (record.normal), curr_ray.color * params.color);
+                                                             curr_ray.direction.unit ().reflect (record.normal),
+                                                             curr_ray.color * params.color);
 
                                         worklist.push_back (std::pair (reflected, depth - 1));
 
@@ -156,8 +157,8 @@ void World::photon_map_forward_pass ()
                                         if (curr_ray.can_refract (record.normal, mu)) {
                                                 Ray refracted =
                                                         Ray (record.hit_point,
-                                                             curr_ray.direction.unit ().refract (record.normal, mu), curr_ray.color * params.color);
-
+                                                             curr_ray.direction.unit ().refract (record.normal, mu),
+                                                             curr_ray.color * params.color);
 
                                                 worklist.push_back (std::pair (refracted, depth - 1));
                                         }

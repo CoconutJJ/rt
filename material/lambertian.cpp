@@ -8,18 +8,20 @@
 #include "vec3.hpp"
 #include <cmath>
 
-Lambertian::Lambertian (Vec3 albedo) : Material ()
+Lambertian::Lambertian (Vec3 albedo) : Material (new SolidTexture (albedo), nullptr)
 {
-        // TODO: free this...
-        this->texture = new SolidTexture (albedo);
 }
 
-Lambertian::Lambertian (Texture *texture) : Material (), texture (texture)
+Lambertian::Lambertian (Texture *texture) : Material (texture, nullptr)
 {
-        this->texture = texture;
 }
 
-Vec3 Lambertian::scatter (Ray r, HitRecord &record)
+Vec3 Lambertian::scatter (Ray r, HitRecord &record, Vec3 &brdf)
 {
-        return Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2));
+        Vec3 out_direction = record.obj->tnb (record.hit_point) *
+                             Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv ();
+
+        brdf = record.obj->brdf (record.hit_point, r.direction, out_direction);
+
+        return out_direction;
 }

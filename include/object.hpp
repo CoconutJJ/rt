@@ -24,6 +24,7 @@ class Object {
         virtual Vec3 to_uv (Vec3 point) = 0;
         Vec3 mapped_normal (Vec3 point);
         Mat3 tbn (Vec3 point);
-        Mat3 tnb(Vec3 point);
+        Mat3 tnb (Vec3 point);
         Vec3 tbn_transform (Vec3 point, Vec3 tangent_v);
+        Vec3 brdf (Vec3 point, Vec3 in_direction, Vec3 out_direction);
 };

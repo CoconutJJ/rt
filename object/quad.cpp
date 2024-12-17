@@ -61,7 +61,7 @@ Vec3 Quad::tangent (Vec3 _)
 
 Vec3 Quad::normal (Vec3 _)
 {
-        return this->v1.cross (-this->v2);
+        return this->v1.cross (this->v2);
 }
 
 Vec3 Quad::to_uv (Vec3 point)

@@ -192,6 +192,14 @@ Vec3 Vec3::sph ()
         return Vec3 (this->length (), theta, phi);
 }
 
+Vec3 Vec3::sph_inv()
+{
+        double p = this->x, phi = this->z, theta = this->y;
+
+        return Vec3(p * sin(phi) * cos(theta), p * cos(phi), p * sin(phi) * sin(theta));
+
+}
+
 double &Vec3::operator[] (int index)
 {
         switch (index) {

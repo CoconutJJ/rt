@@ -29,20 +29,19 @@ class ObjFile {
         ObjFile (const char *filename);
 
         char peek_char ();
-        bool match_char(char c);
-        char advance_char();
+        bool match_char (char c);
+        char advance_char ();
 
         bool match_token (TokenType type);
-        struct Token parse_token();
-        struct Token advance_token();
-        struct Token peek_token();
-        struct Token consume_token(enum TokenType type, const char *error);
-        struct Token parse_numeric();
-        struct Token parse_keyword(char *keyword);
+        struct Token parse_token ();
+        struct Token advance_token ();
+        struct Token peek_token ();
+        struct Token consume_token (enum TokenType type, const char *error);
+        struct Token parse_numeric ();
+        struct Token parse_keyword (char *keyword);
 
         Vec3 parse_uv ();
         Vec3 parse_vertex_normal ();
         Vec3 parse_vertex ();
-        Triangle parse_face();
-        
+        Triangle parse_face ();
 };

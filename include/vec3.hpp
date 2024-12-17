@@ -30,6 +30,7 @@ class Vec3 {
         Vec3 reflect (Vec3 normal);
         Vec3 refract (Vec3 n, double mu);
         Vec3 sph();
+        Vec3 sph_inv();
         bool near_zero ();
         static Vec3 random ();
         static Vec3 zero ();

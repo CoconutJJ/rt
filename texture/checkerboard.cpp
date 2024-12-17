@@ -9,9 +9,9 @@ CheckerboardTexture::CheckerboardTexture (Vec3 even_color, Vec3 odd_color)
 {
 }
 
-Vec3 CheckerboardTexture::photon_map(Vec3 point) 
+Vec3 CheckerboardTexture::photon_map (Vec3 point)
 {
-        return Vec3::zero();
+        return Vec3::zero ();
 }
 
 Vec3 CheckerboardTexture::read_texture_uv (Vec3 uv, Vec3 point)

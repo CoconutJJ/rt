@@ -33,6 +33,6 @@ bool Triangle::hit (Ray r, HitRecord &record)
         record.mat = this->mat;
         record.setNormal (r, this->mapped_normal (record.hit_point));
         record.obj = this;
-        
+
         return true;
 }

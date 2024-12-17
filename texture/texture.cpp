@@ -15,5 +15,4 @@ void Texture::store_photon (Vec3 uv, Vec3 color)
         size_t y = size_t (uv.y * this->photon_map_height);
 
         this->photon_texture[y * this->photon_map_width + x] += color;
-
 }

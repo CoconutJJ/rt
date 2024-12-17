@@ -209,8 +209,11 @@ void lookup_brdf_val (double *brdf,
         blue_val = brdf[ind + BRDF_SAMPLING_RES_THETA_H * BRDF_SAMPLING_RES_THETA_D * BRDF_SAMPLING_RES_PHI_D] *
                    BLUE_SCALE;
 
-        if (red_val < 0.0 || green_val < 0.0 || blue_val < 0.0)
-                fprintf (stderr, "Below horizon.\n");
+        if (red_val < 0.0 || green_val < 0.0 || blue_val < 0.0) {
+                red_val = 0;
+                green_val = 0;
+                blue_val = 0;
+        }
 }
 
 // Read BRDF data
@@ -236,7 +239,7 @@ bool read_brdf (const char *filename, double *&brdf)
         return true;
 }
 
-BRDF::BRDF (char *filename)
+BRDF::BRDF (const char *filename)
 {
         if (!read_brdf (filename, this->brdf))
                 throw std::logic_error ("Could not open BRDF file");

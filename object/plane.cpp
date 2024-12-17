@@ -2,7 +2,6 @@
 #include "material.hpp"
 #include "object.hpp"
 #include "vec3.hpp"
-#include <stdexcept>
 
 Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
 {
@@ -44,7 +43,7 @@ Vec3 Plane::to_uv (Vec3 point)
 
 Vec3 Plane::tangent (Vec3 point)
 {
-        throw std::logic_error ("Not implemented!");
+        return this->u;
 }
 
 Vec3 Plane::normal (Vec3 point)

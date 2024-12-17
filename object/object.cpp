@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+#include <stdexcept>
 
 Object::Object (Vec3 location1, Vec3 location2, Material *material)
         : location (location1), location2 (location2), mat (material)
@@ -65,4 +66,12 @@ Mat3 Object::tnb (Vec3 point)
 Vec3 Object::tbn_transform (Vec3 point, Vec3 tangent_v)
 {
         return this->tbn (point) * tangent_v;
+}
+
+Vec3 Object::brdf (Vec3 point, Vec3 in_direction, Vec3 out_direction)
+{
+        if (!this->mat->brdf)
+                throw std::logic_error ("No BRDF specified!");
+
+        return this->mat->brdf->compute (this->tnb (point), in_direction, out_direction);
 }

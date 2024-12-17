@@ -1,15 +1,18 @@
 #include "dielectric.hpp"
 #include "hitrecord.hpp"
+#include "material.hpp"
 #include "ray.hpp"
+#include "solid_texture.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
 #include <cmath>
 
 Dielectric::Dielectric (double refraction_index) : refraction_index (refraction_index)
 {
+        this->texture = new SolidTexture (Vec3 (1, 1, 1));
 }
 
-Vec3 Dielectric::scatter (Ray r, HitRecord &record)
+Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf)
 {
         double mu = record.front_face ? (1 / refraction_index) : refraction_index;
         Vec3 unit_direction = r.direction.unit ();
@@ -20,11 +23,13 @@ Vec3 Dielectric::scatter (Ray r, HitRecord &record)
         Vec3 direction;
         if (mu * sin_theta > 1.0 || reflectance (cos_theta, mu) > random_double (0, 1)) {
                 direction = unit_direction.reflect (record.normal);
+                brdf = record.obj->brdf (record.hit_point, r.direction, direction);
         } else {
                 direction = unit_direction.refract (record.normal, mu);
+                brdf = Vec3 (1, 1, 1);
         }
-        
-        return direction.sph();
+
+        return direction;
 }
 
 double Dielectric::reflectance (double cosine, double refraction_index)
