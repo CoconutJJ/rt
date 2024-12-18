@@ -148,19 +148,19 @@ int main (int argc, char **argv)
 
         World world;
 
-        BRDF brdf ("brdf/nylon.binary");
+        BRDF brdf ("brdf/white-diffuse-bball.binary");
         Dielectric glass (1.5);
         glass.brdf = &brdf;
         Lambertian lamb (Vec3 (1, 1, 1));
         lamb.brdf = &brdf;
-        lamb.emission (Vec3 (50, 50, 50));
+        lamb.emission (Vec3 (100, 100, 100));
         // lamb.emission (Vec3 (20, 20, 20));
 
         Lambertian lamb2 (Vec3 (0.8, 0.2, 0.2));
         lamb2.brdf = &brdf;
 
         Quad light_panel (Vec3 (-1, 0, -1), Vec3 (-1, 0, 0), Vec3 (0, 0, 1), &lamb);
-        Sphere sp (Vec3 (0, -1.5, -1), 0.5, &glass);
+        Sphere sp (Vec3 (-1, -1.5, -1), 0.5, &glass);
 
         CheckerboardTexture checkerboard (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
         Lambertian background (&checkerboard);

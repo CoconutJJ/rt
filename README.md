@@ -7,12 +7,11 @@ Currently includes:
 - Texture Mapping
 - Lights: Point Lights, Quad Lights
 - Phong Shading
+- Path Tracing
 
 Still need to add:
-
-- Transparent materials (Glass)
-- Bump/Normal Maps
-- 
+- Obj File Parser/Loader
+- Scene File Parser/Loader
 
 ## How to run
 
@@ -43,17 +42,23 @@ started doing my own thing by reading these
 Started following Ray Tracing in One Weekend. Got metallic and diffuse spheres
 working.
 
-![](static/iter1.png)
+<img src="static/iter1.png" width=500/>
 
 Got texture maps working...
 
-![](static/iter2.png)
+<img src="static/iter2.png" width=500/>
 
 Started doing my own thing, following the lecture notes. Implemented Phong 
 illumination
 
-![](static/iter3.png)
+<img src="static/iter3.png" width=500/>
 
 Applying textures, shadows and Phong lighting...
 
-![](static/iter4.png)
+<img src="static/iter4.png" width=500/>
+
+Path Tracing is working!
+
+<img src="static/iter5.png" width=500/>
+
+<img src="static/iter6.png" width=500/>

@@ -32,8 +32,8 @@ void Camera::initialize (double aspect_ratio,
 {
         this->aspect_ratio = aspect_ratio;
         this->image_width = image_width;
-        this->lookat = Vec3 (0, 0, -1);
-        this->center = Vec3 (0, 3, 2);
+        this->lookat = Vec3 (0, -1, -1);
+        this->center = Vec3 (0, -1, 3);
         this->defocus_angle = defocus_angle;
         this->focus_dist = 1;
         Vec3 w = (this->center - this->lookat).unit ();
@@ -42,7 +42,7 @@ void Camera::initialize (double aspect_ratio,
         Vec3 v = w.cross (u);
 
         this->vfov = vfov;
-        this->max_depth = 5;
+        this->max_depth = 10;
         this->samples_per_pixel = samples_per_pixel;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
@@ -93,11 +93,6 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                         diffuse_component =
                                 light->diffuse_intensity (point) * std::max (0.0, light_direction.dot (record.normal));
 
-                        // Original Phong lighting:
-                        // specular_component = light->specular_intensity (point) *
-                        //                      std::pow (std::max (0.0, mirror_direction.dot (to_camera)),
-                        //                      params.alpha);
-
                         // Blinn-Phong Lighting: halfway vector
                         Vec3 halfway = (to_camera + light_direction).unit ();
 
@@ -113,12 +108,6 @@ Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, M
                         if (world->has_path (record.hit_point, point)) {
                                 diffuse_component += light->diffuse_intensity (point) *
                                                      std::max (0.0, light_direction.dot (record.normal)) / K;
-                                // Vec3 mirror_direction = (-light_direction).reflect (record.normal);
-
-                                // specular_component +=
-                                //         light->specular_intensity (point) *
-                                //         std::pow (std::max (0.0, mirror_direction.dot (to_camera)), params.alpha) /
-                                //         K;
 
                                 Vec3 halfway = (to_camera + light_direction).unit ();
 
@@ -195,20 +184,15 @@ Vec3 Camera::path_color (Ray r, World *world, int depth)
         if (!world->hit (r, record))
                 return Vec3 (0, 0, 0);
 
-        Object *obj = record.obj;
-
         Vec3 in_direction = r.direction;
 
         Vec3 brdf;
         Ray scatter_ray (record.hit_point, record.mat->scatter (r, record, brdf));
 
-        // Vec3 brdf = obj->brdf (record.hit_point, in_direction, scatter_ray.direction);
-
         Vec3 scatter_color = this->path_color (scatter_ray, world, depth - 1);
 
         return record.mat->emission (r, record) +
-               (scatter_color.elem_mul (brdf) * record.normal.dot (-in_direction.unit ()))
-                       .elem_mul (record.mat->color (record));
+               scatter_color * brdf * record.normal.dot (-in_direction.unit ()) * record.mat->color (record);
 }
 
 void Camera::set_output_file (const char *filename)

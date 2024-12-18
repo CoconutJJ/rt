@@ -42,6 +42,11 @@ Vec3 Vec3::operator* (double d)
         return Vec3 (this->x * d, this->y * d, this->z * d);
 }
 
+Vec3 operator* (double scalar, Vec3 a)
+{
+        return a * scalar;
+}
+
 Vec3 Vec3::operator* (Vec3 b)
 {
         return Vec3 (this->x * b.x, this->y * b.y, this->z * b.z);
@@ -151,11 +156,6 @@ Vec3 Vec3::refract (Vec3 n, double mu)
         return dir;
 }
 
-Vec3 Vec3::elem_mul (Vec3 b)
-{
-        return Vec3 (this->x * b.x, this->y * b.y, this->z * b.z);
-}
-
 Vec3 Vec3::zero ()
 {
         return Vec3 (0, 0, 0);
@@ -192,12 +192,11 @@ Vec3 Vec3::sph ()
         return Vec3 (this->length (), theta, phi);
 }
 
-Vec3 Vec3::sph_inv()
+Vec3 Vec3::sph_inv ()
 {
         double p = this->x, phi = this->z, theta = this->y;
 
-        return Vec3(p * sin(phi) * cos(theta), p * cos(phi), p * sin(phi) * sin(theta));
-
+        return Vec3 (p * sin (phi) * cos (theta), p * cos (phi), p * sin (phi) * sin (theta));
 }
 
 double &Vec3::operator[] (int index)

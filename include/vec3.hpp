@@ -23,7 +23,6 @@ class Vec3 {
         double dot (Vec3 b);
         double length_squared ();
         double length ();
-        Vec3 elem_mul (Vec3 b);
         Vec3 cross (Vec3 b);
         Vec3 unit ();
         Vec3 clamp (double min, double max);
@@ -38,3 +37,4 @@ class Vec3 {
     private:
         double argument(double y_opp, double x_adj);
 };
+Vec3 operator*(double scalar, Vec3 a);
