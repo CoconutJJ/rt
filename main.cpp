@@ -10,12 +10,14 @@
 #include "quad_light.hpp"
 #include "solid_texture.hpp"
 #include "sphere.hpp"
+#include "termcolor.hpp"
 #include "usage.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <thread>
@@ -60,15 +62,18 @@ World ray_trace_scene ()
         return world;
 }
 
-int main (int argc, char **argv)
+struct Camera::RendererSettings process_arguments (int argc, char **argv, char *&filename, int &nthreads)
 {
-        int c, optidx = 0;
+        struct Camera::RendererSettings config;
 
-        char *filename = NULL;
+        memset (&config, 0, sizeof (struct Camera::RendererSettings));
 
-        int image_width = -1, nthreads = -1, samples_per_pixel = 500;
-        double aspect_ratio = 16.0 / 9.0, vfov = 90.0, defocus_angle = 0.0, arealight_samples = 2;
-        bool use_path_tracer = false;
+        config.image_width = 600;
+        config.aspect_ratio = 16.0 / 9;
+        config.vfov = 60;
+        config.arealight_samples = 10;
+        config.samples_per_pixel = 1000;
+
         struct option longopts[] = {
                 { .name = "out_file", .has_arg = 1, .val = 'f' },
                 { .name = "image_width", .has_arg = 1, .val = 'w' },
@@ -78,14 +83,15 @@ int main (int argc, char **argv)
                 { .name = "help", .has_arg = 0, .val = 'h' },
                 { .name = "nthreads", .has_arg = 1, .val = 'n' },
                 { .name = "arealight_samples", .has_arg = 1, .val = 'a' },
-                { .name = "path_tracer", .has_arg = 0, .val = 'p' },
+                { .name = "use_path_tracer", .has_arg = 0, .val = 'p' },
                 { .name = "samples_per_pixel", .has_arg = 1, .val = 's' },
                 { 0 }
         };
-        while ((c = getopt_long (argc, argv, "f:w:", longopts, &optidx)) != -1) {
+        int c, optidx;
+        while ((c = getopt_long (argc, argv, "", longopts, &optidx)) != -1) {
                 switch (c) {
                 case 'f': filename = optarg; break;
-                case 'w': image_width = strtol (optarg, NULL, 10); break;
+                case 'w': config.image_width = strtol (optarg, NULL, 10); break;
                 case 'r': {
                         char *split = NULL;
                         double width = strtod (optarg, &split);
@@ -96,15 +102,15 @@ int main (int argc, char **argv)
                         }
                         double height = strtod (split + 1, &split);
 
-                        aspect_ratio = width / height;
+                        config.aspect_ratio = width / height;
                         break;
                 }
                 case 'v': {
-                        vfov = strtod (optarg, NULL);
+                        config.vfov = strtod (optarg, NULL);
                         break;
                 }
                 case 't': {
-                        defocus_angle = strtod (optarg, NULL);
+                        config.defocus_angle = strtod (optarg, NULL);
                         break;
                 }
                 case 'n': {
@@ -112,15 +118,15 @@ int main (int argc, char **argv)
                         break;
                 }
                 case 'a': {
-                        arealight_samples = strtol (optarg, NULL, 10);
+                        config.arealight_samples = strtol (optarg, NULL, 10);
                         break;
                 }
                 case 'p': {
-                        use_path_tracer = true;
+                        config.use_path_tracer = true;
                         break;
                 }
                 case 's': {
-                        samples_per_pixel = strtol(optarg, NULL, 10);
+                        config.samples_per_pixel = strtol (optarg, NULL, 10);
                         break;
                 }
                 case 'h': {
@@ -129,7 +135,17 @@ int main (int argc, char **argv)
                 }
                 }
         }
-        std::cout << "rt: a ray tracer\n";
+
+        return config;
+}
+
+int main (int argc, char **argv)
+{
+        int nthreads = -1;
+
+        char *filename = NULL;
+
+        struct Camera::RendererSettings config = process_arguments (argc, argv, filename, nthreads);
 
         if (!filename) {
                 std::cerr << "Must provide --out_file | -f argument.\n";
@@ -137,14 +153,20 @@ int main (int argc, char **argv)
                 exit (EXIT_FAILURE);
         }
 
-        if (image_width <= 0) {
+        if (config.image_width == 0) {
                 std::cerr << "Must supply --image_width | -w argument.\n";
                 usage ();
                 exit (EXIT_FAILURE);
         }
 
+        if (config.use_path_tracer && config.samples_per_pixel < 500) {
+                std::cerr
+                        << termcolor::red << "WARNING: " << termcolor::reset
+                        << "path tracer is enabled, pixel sample count is very low! Consider setting sample count > 500.\n ";
+        }
+
         Camera camera;
-        camera.initialize (aspect_ratio, image_width, vfov, defocus_angle, arealight_samples, samples_per_pixel);
+        camera.initialize (config);
 
         World world;
 
@@ -154,7 +176,6 @@ int main (int argc, char **argv)
         Lambertian lamb (Vec3 (1, 1, 1));
         lamb.brdf = &brdf;
         lamb.emission (Vec3 (100, 100, 100));
-        // lamb.emission (Vec3 (20, 20, 20));
 
         Lambertian lamb2 (Vec3 (0.8, 0.2, 0.2));
         lamb2.brdf = &brdf;
@@ -173,12 +194,6 @@ int main (int argc, char **argv)
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();
-
-        if (use_path_tracer) {
-                std::cerr << "rt: using path tracer on " << nthreads << " threads\n";
-                camera.path_render (&world, filename, nthreads);
-                return 0;
-        }
 
         if (nthreads > 1) {
                 std::cerr << "rt running on " << nthreads << " threads.\n";

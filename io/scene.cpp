@@ -1,5 +1,5 @@
 #include "scene.hpp"
-#include "object.hpp"
+#include "smooth_object.hpp"
 #include <cstring>
 #include <iostream>
 #include <string>

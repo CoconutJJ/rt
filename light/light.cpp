@@ -1,11 +1,11 @@
 #include "light.hpp"
-#include "object.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 
 Light::Light () : object (nullptr)
 {
 }
 
-Light::Light (Object *object) : object (object)
+Light::Light (SmoothObject *object) : object (object)
 {
 }

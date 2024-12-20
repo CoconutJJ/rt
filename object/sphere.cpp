@@ -1,16 +1,16 @@
 #include "sphere.hpp"
 #include "material.hpp"
-#include "object.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 #include <cmath>
 
-Sphere::Sphere (Vec3 center, double radius, Material *material) : Object (center, material)
+Sphere::Sphere (Vec3 center, double radius, Material *material) : SmoothObject (center, material)
 {
         this->radius = radius;
 }
 
-Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : Object (from, to, material)
+Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : SmoothObject (from, to, material)
 {
         this->radius = radius;
 }

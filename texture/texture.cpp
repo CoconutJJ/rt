@@ -8,7 +8,10 @@ Texture::Texture ()
         this->photon_map_width = 400;
         this->photon_texture = new Vec3[this->photon_map_height * this->photon_map_width];
 }
-
+Texture::~Texture ()
+{
+        delete[] this->photon_texture;
+}
 void Texture::store_photon (Vec3 uv, Vec3 color)
 {
         size_t x = size_t (uv.x * this->photon_map_width);

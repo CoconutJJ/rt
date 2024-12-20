@@ -15,6 +15,11 @@ Mat3 Mat3::operator* (Mat3 B)
         return Mat3 (*this * B.c1, *this * B.c2, *this * B.c3);
 }
 
+Mat3 Mat3::operator* (double d)
+{
+        return Mat3 (this->c1 * d, this->c2 * d, this->c3 * d);
+}
+
 Mat3 Mat3::transpose ()
 {
         return Mat3 (Vec3 (this->c1.x, this->c2.x, this->c3.x),

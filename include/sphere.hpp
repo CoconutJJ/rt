@@ -1,9 +1,9 @@
 #include "material.hpp"
-#include "object.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 
-class Sphere : public Object {
+class Sphere : public SmoothObject {
     public:
         double radius;
 

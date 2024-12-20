@@ -14,6 +14,9 @@ Material::Material (Texture *texture, Texture *normal_map) : texture (texture), 
 
 Vec3 Material::normal (Mat3 tbn, Vec3 n, Vec3 uv)
 {
+        if (!this->normal_map)
+                return n;
+
         Vec3 normal = this->normal_map->read_rgb255 (uv);
 
         normal = normal * 2.0 / 255 + Vec3 (-1, -1, -1);
@@ -34,4 +37,9 @@ void Material::emission (Vec3 color)
 Vec3 Material::emission (Ray r, HitRecord &record)
 {
         return this->emission_value;
+}
+
+bool Material::is_emissive ()
+{
+        return this->emission_value.length_squared () > 0;
 }

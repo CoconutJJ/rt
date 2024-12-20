@@ -1,11 +1,11 @@
 #include "quad_light.hpp"
 #include "light.hpp"
-#include "object.hpp"
+#include "smooth_object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
 #include <algorithm>
 
-QuadLight::QuadLight (Quad *quad) : Light ((Object *)quad), quad (quad)
+QuadLight::QuadLight (Quad *quad) : Light ((SmoothObject *)quad), quad (quad)
 {
 }
 

@@ -6,6 +6,7 @@
 class Texture {
     public:
         Texture ();
+        virtual ~Texture ();
         size_t photon_map_width;
         size_t photon_map_height;
         Vec3 *photon_texture;

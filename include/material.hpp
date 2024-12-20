@@ -36,7 +36,7 @@ class Material {
         {
                 return PhongParams{ 0, 0, 0, 0, 0, 0, 0, 0, Vec3 (0, 0, 0) };
         };
-
+        virtual bool is_emissive ();
         virtual void emission (Vec3 color);
         virtual Vec3 color (HitRecord &record);
         virtual Vec3 emission (Ray r, HitRecord &record);

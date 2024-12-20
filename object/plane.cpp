@@ -1,6 +1,6 @@
 #include "plane.hpp"
 #include "material.hpp"
-#include "object.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 
 Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
@@ -18,18 +18,27 @@ Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
                 return Vec3 (0, 0, 0);
 }
 
-Plane::Plane (Vec3 location, Vec3 normal, Material *material) : Object (location, material), n (normal)
+Plane::Plane (Vec3 location, Vec3 normal, Material *material) : SmoothObject (location, material), n (normal)
 {
         // compute orthonormal basis vectors for plane
         this->u = findVectorOnPlane (normal, location).unit ();
         this->v = normal.cross (u).unit ();
 }
 
-Plane::Plane (Vec3 location, Vec3 u, Vec3 v, Material *material) : Object (location, material)
+Plane::Plane (Vec3 location, Vec3 u, Vec3 v, Material *material) : SmoothObject (location, material)
 {
         this->u = u.unit ();
         this->v = v.unit ();
         this->n = u.cross (v);
+}
+
+Plane::Plane (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) : SmoothObject (p1, material)
+{
+        this->u = (p2 - p1).unit ();
+        this->v = (p3 - p2).unit ();
+
+        // we assume normal vector is correct.
+        this->n = normal;
 }
 
 Vec3 Plane::to_uv (Vec3 point)

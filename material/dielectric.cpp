@@ -12,6 +12,11 @@ Dielectric::Dielectric (double refraction_index) : refraction_index (refraction_
         this->texture = new SolidTexture (Vec3 (1, 1, 1));
 }
 
+Dielectric::~Dielectric ()
+{
+        delete this->texture;
+}
+
 Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf)
 {
         double mu = record.front_face ? (1 / refraction_index) : refraction_index;
@@ -20,7 +25,7 @@ Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf)
         double cos_theta = std::fmin (-unit_direction.dot (record.normal), 1.0);
 
         Vec3 direction;
-        if (!r.can_refract(record.normal, mu) || reflectance (cos_theta, mu) > random_double (0, 1)) {
+        if (!r.can_refract (record.normal, mu) || reflectance (cos_theta, mu) > random_double (0, 1)) {
                 direction = unit_direction.reflect (record.normal);
                 brdf = record.obj->brdf (record.hit_point, r.direction, direction);
         } else {

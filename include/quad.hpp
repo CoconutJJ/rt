@@ -1,9 +1,9 @@
 #pragma once
 
 #include "material.hpp"
-#include "object.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
-class Quad : public Object {
+class Quad : public SmoothObject {
     public:
         Quad (Vec3 location, Vec3 v1, Vec3 v2, Material *mat);
         bool hit (Ray r, HitRecord &record) override;

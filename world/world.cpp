@@ -3,9 +3,9 @@
 #include "hitrecord.hpp"
 #include "light.hpp"
 #include "material.hpp"
-#include "object.hpp"
 #include "progress_bar.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 #include <cfloat>
 #include <utility>
@@ -15,7 +15,7 @@ World::World ()
 {
 }
 
-void World::add (Object *obj)
+void World::add (SmoothObject *obj)
 {
         this->objects.push_back (obj);
 }
@@ -34,7 +34,7 @@ bool World::hit (Ray r, HitRecord &record)
 
         bool hit_anything = false;
 
-        for (Object *obj : this->objects) {
+        for (SmoothObject *obj : this->objects) {
                 if (!obj->hit (r, curr_record))
                         continue;
 
@@ -48,7 +48,7 @@ bool World::hit (Ray r, HitRecord &record)
         return hit_anything;
 }
 
-bool World::has_path (Ray r, Object *obj)
+bool World::has_path (Ray r, SmoothObject *obj)
 {
         HitRecord obj_rec;
         if (!obj->hit (r, obj_rec))
@@ -56,7 +56,7 @@ bool World::has_path (Ray r, Object *obj)
 
         double lambda_min = 0.001;
 
-        for (Object *curr : this->objects) {
+        for (SmoothObject *curr : this->objects) {
                 if (curr == obj)
                         continue;
 

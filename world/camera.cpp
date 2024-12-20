@@ -23,31 +23,29 @@ Camera::Camera () : pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), 
 {
 }
 
-void Camera::initialize (double aspect_ratio,
-                         int image_width,
-                         double vfov,
-                         double defocus_angle,
-                         int arealight_samples,
-                         int samples_per_pixel)
+void Camera::initialize (struct RendererSettings settings)
 {
-        this->aspect_ratio = aspect_ratio;
-        this->image_width = image_width;
+        this->aspect_ratio = settings.aspect_ratio;
+        this->image_width = settings.image_width;
+        this->defocus_angle = settings.defocus_angle;
+        this->samples_per_pixel = settings.samples_per_pixel;
+        this->vfov = settings.vfov;
+        this->use_path_tracer = settings.use_path_tracer;
+        this->arealight_samples = settings.arealight_samples;
+
         this->lookat = Vec3 (0, -1, -1);
         this->center = Vec3 (0, -1, 3);
-        this->defocus_angle = defocus_angle;
         this->focus_dist = 1;
-        Vec3 w = (this->center - this->lookat).unit ();
-        Vec3 vup (0, 1, 0);
-        Vec3 u = vup.cross (w).unit ();
-        Vec3 v = w.cross (u);
 
-        this->vfov = vfov;
         this->max_depth = 10;
-        this->samples_per_pixel = samples_per_pixel;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
         this->viewport_width = this->viewport_height * (double (this->image_width) / this->image_height);
 
+        Vec3 w = (this->center - this->lookat).unit ();
+        Vec3 vup (0, 1, 0);
+        Vec3 u = vup.cross (w).unit ();
+        Vec3 v = w.cross (u);
         Vec3 viewport_u = u * this->viewport_width;
         Vec3 viewport_v = -v * this->viewport_height;
         Vec3 viewport_top_left = this->center - w * focus_dist - viewport_u / 2 - viewport_v / 2;
@@ -60,7 +58,6 @@ void Camera::initialize (double aspect_ratio,
 
         this->defocus_disk_u = u * defocus_radius;
         this->defocus_disk_v = v * defocus_radius;
-        this->arealight_samples = arealight_samples;
 }
 
 Vec3 Camera::defocus_disk_sample ()
@@ -80,42 +77,57 @@ Ray Camera::ray (int du, int dv)
         return Ray (origin, direction, time);
 }
 
-Vec3 Camera::sample_light_rays (World *world, HitRecord &record, Light *light, Material::PhongParams params, int K)
+/**
+        For the ray tracer, we need to shoot a ray to each light source. This
+        method returns the diffuse and specular lighting components for the
+        Blinn-Phong lighting model.
+
+ */
+Vec3 Camera::sample_light_rays (World *world,
+                                HitRecord &record,
+                                Light *light,
+                                Material::PhongParams params,
+                                int light_num_samples)
 {
         Vec3 to_camera = (this->center - record.hit_point).unit ();
         Vec3 diffuse_component (0, 0, 0), specular_component (0, 0, 0);
-        if (light->is_point_light ()) {
+
+        /**
+                Arealights and Point-source lights needed to be treated differently: area lights require us to sample
+                multiple points (K) where as point source lights only have one point.
+        */
+        if (light->is_point_light ())
+                light_num_samples = 1;
+
+        /**
+                We use the Blinn-Phong Lighting Model for the ray tracer.
+
+         */
+
+        for (int i = 0; i < light_num_samples; i++) {
                 Vec3 point = light->sample_point ();
+
+                /**
+                        Path from hit point to light source must be clear,
+                        otherwise we omit the diffuse and specular components,
+                        creating a shadow.
+                 */
+
+                if (!world->has_path (record.hit_point, point))
+                        continue;
+
                 Vec3 light_direction = (point - record.hit_point).unit ();
-                // Vec3 mirror_direction = (-light_direction).reflect (record.normal);
+                Ray to_light = Ray (record.hit_point, light_direction);
 
-                if (world->has_path (record.hit_point, point)) {
-                        diffuse_component =
-                                light->diffuse_intensity (point) * std::max (0.0, light_direction.dot (record.normal));
+                diffuse_component += light->diffuse_intensity (point) *
+                                     std::max (0.0, light_direction.dot (record.normal)) / light_num_samples;
 
-                        // Blinn-Phong Lighting: halfway vector
-                        Vec3 halfway = (to_camera + light_direction).unit ();
+                // Blinn-Phong Lighting: halfway vector
+                Vec3 halfway = (to_camera + light_direction).unit ();
 
-                        specular_component = light->specular_intensity (point) *
-                                             std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha);
-                }
-        } else {
-                for (int i = 0; i < K; i++) {
-                        Vec3 point = light->sample_point ();
-                        Vec3 light_direction = (point - record.hit_point).unit ();
-                        Ray to_light = Ray (record.hit_point, light_direction);
-
-                        if (world->has_path (record.hit_point, point)) {
-                                diffuse_component += light->diffuse_intensity (point) *
-                                                     std::max (0.0, light_direction.dot (record.normal)) / K;
-
-                                Vec3 halfway = (to_camera + light_direction).unit ();
-
-                                specular_component =
-                                        light->specular_intensity (point) *
-                                        std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha) / K;
-                        }
-                }
+                specular_component = light->specular_intensity (point) *
+                                     std::pow (std::max (0.0, halfway.dot (record.normal)), params.alpha) /
+                                     light_num_samples;
         }
 
         diffuse_component *= params.rd;
@@ -141,7 +153,6 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
                 color += this->sample_light_rays (world, record, light_source, params, this->arealight_samples);
 
         color += world->photon_map_color (record.hit_point) * 1.5;
-
         color *= params.gamma;
 
         Vec3 normal = record.normal;
@@ -207,68 +218,6 @@ void Camera::set_output_file (const char *filename)
                      << "\n";
 }
 
-void Camera::path_render (World *world, const char *filename, int max_threads)
-{
-        std::ofstream file_stream = std::ofstream (std::string (filename));
-        this->stream.rdbuf (file_stream.rdbuf ());
-
-        this->stream << "P3\n"
-                     << this->image_width << ' ' << this->image_height << "\n"
-                     << "255"
-                     << "\n";
-
-        std::mutex pixel_lock;
-        std::counting_semaphore<> sem (max_threads);
-        std::counting_semaphore<> progress (0);
-        std::vector<std::thread> threads;
-        std::vector<Vec3> pixels (this->image_width * this->image_height);
-        for (int j = 0; j < this->image_height; j++) {
-                threads.push_back (std::thread ([&, j] {
-                        sem.acquire ();
-
-                        for (int i = 0; i < this->image_width; i++) {
-                                Vec3 color (0, 0, 0);
-
-                                for (int sample = 0; sample < this->samples_per_pixel; sample++) {
-                                        Ray r = this->ray (i + random_double (-0.5, 0.5),
-                                                           j + random_double (-0.5, 0.5));
-                                        color += this->path_color (r, world, this->max_depth);
-                                }
-
-                                color /= this->samples_per_pixel;
-
-                                pixel_lock.lock ();
-                                pixels[i + j * image_width] = color;
-                                pixel_lock.unlock ();
-                        }
-                        sem.release ();
-                        progress.release ();
-                }));
-        }
-
-        progressbar bar (image_height);
-
-        auto start_time = std::chrono::high_resolution_clock::now ();
-
-        for (int p = 0; p < image_height; p++) {
-                progress.acquire ();
-                bar.update ();
-        }
-        std::cerr << "\n";
-
-        for (std::thread &t : threads)
-                t.join ();
-
-        auto end_time = std::chrono::high_resolution_clock::now ();
-
-        int time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
-
-        for (Vec3 &pixel_color : pixels)
-                this->write_color (pixel_color);
-
-        std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
-}
-
 void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
 {
         std::ofstream file_stream = std::ofstream (std::string (filename));
@@ -293,11 +242,12 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                                         Ray r = this->ray (i + random_double (-0.5, 0.5),
                                                            j + random_double (-0.5, 0.5));
 
-                                        Vec3 color = this->ray_color (r, world, this->max_depth);
-                                        pixel_color += color;
+                                        pixel_color += this->use_path_tracer ?
+                                                               this->path_color (r, world, this->max_depth) :
+                                                               this->ray_color (r, world, this->max_depth);
                                 }
 
-                                pixel_color *= 1.0 / double (this->samples_per_pixel);
+                                pixel_color /= double (this->samples_per_pixel);
 
                                 pixel_lock.lock ();
                                 pixels[i + j * image_width] = pixel_color;
@@ -343,7 +293,8 @@ void Camera::render (World *world, const char *filename)
                         Vec3 pixel_color (0, 0, 0);
                         for (int sample = 0; sample < this->samples_per_pixel; sample++) {
                                 Ray r = this->ray (i + random_double (-0.5, 0.5), j + random_double (-0.5, 0.5));
-                                pixel_color += this->ray_color (r, world, this->max_depth);
+                                pixel_color += this->use_path_tracer ? this->path_color (r, world, this->max_depth) :
+                                                                       this->ray_color (r, world, this->max_depth);
                         }
                         pixel_color *= 1.0 / double (this->samples_per_pixel);
                         this->write_color (pixel_color);

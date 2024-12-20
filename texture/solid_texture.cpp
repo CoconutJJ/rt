@@ -4,7 +4,9 @@
 SolidTexture::SolidTexture (Vec3 color) : color (color)
 {
 }
-
+SolidTexture::~SolidTexture ()
+{
+}
 Vec3 SolidTexture::photon_map (Vec3 point)
 {
         return Vec3::zero ();

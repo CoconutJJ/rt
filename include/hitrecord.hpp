@@ -1,10 +1,10 @@
 #pragma once
 #include "material.hpp"
-#include "object.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 
-class Object;
+class SmoothObject;
 
 class HitRecord {
     public:
@@ -13,7 +13,7 @@ class HitRecord {
         double lambda;
         Vec3 normal;
         Material *mat;
-        Object *obj;
+        SmoothObject *obj;
         Vec3 uv;
         bool front_face;
         void setNormal (Ray r, Vec3 normal);

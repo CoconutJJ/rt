@@ -1,5 +1,6 @@
 #include "vec3.hpp"
 #include "utils.hpp"
+#include <cfloat>
 #include <cmath>
 #include <ostream>
 #include <stdexcept>
@@ -97,6 +98,21 @@ bool Vec3::operator== (Vec3 b)
         return (this->x == b.x) && (this->y == b.y) && (this->z == b.z);
 }
 
+bool Vec3::operator< (Vec3 b)
+{
+        for (int i = 0; i < 3; i++) {
+                if ((*this)[i] == b[i])
+                        continue;
+                if ((*this)[i] < b[i])
+                        return true;
+
+                if ((*this)[i] > b[i])
+                        return false;
+        }
+
+        return false;
+}
+
 double Vec3::dot (Vec3 b)
 {
         return this->x * b.x + this->y * b.y + this->z * b.z;
@@ -109,7 +125,7 @@ Vec3 Vec3::cross (Vec3 b)
 
 double Vec3::length_squared ()
 {
-        return this->x * this->x + this->y * this->y + this->z * this->z;
+        return this->dot (*this);
 }
 
 double Vec3::length ()
@@ -197,6 +213,11 @@ Vec3 Vec3::sph_inv ()
         double p = this->x, phi = this->z, theta = this->y;
 
         return Vec3 (p * sin (phi) * cos (theta), p * cos (phi), p * sin (phi) * sin (theta));
+}
+
+Vec3 Vec3::inf ()
+{
+        return Vec3 (DBL_MAX, DBL_MAX, DBL_MAX);
 }
 
 double &Vec3::operator[] (int index)

@@ -1,10 +1,10 @@
 #include "quad.hpp"
 #include "material.hpp"
-#include "object.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
 #include "vec3.hpp"
 
-Quad::Quad (Vec3 location, Vec3 v1, Vec3 v2, Material *mat) : Object (location, mat)
+Quad::Quad (Vec3 location, Vec3 v1, Vec3 v2, Material *mat) : SmoothObject (location, mat)
 {
         this->v1 = v1;
         this->v2 = v2;

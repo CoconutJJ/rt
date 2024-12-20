@@ -1,14 +1,26 @@
 #include "kdtree.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 #include <cstdlib>
+#include <vector>
 
-KDTree::KDTree () : root(nullptr)
+KDTree::KDTree () : root (nullptr)
 {
+}
+
+/*
+        This function constructs a KDTree from a list of points. If we have all
+        the points ahead of time, this will ensure the tree is well balanced.
+
+*/
+KDTree::KDTree (std::vector<Vec3> points)
+{
+        this->root = this->_construct_from_list (points, BoundingBox (), 0);
 }
 
 KDTree::~KDTree ()
 {
-        this->_delete_kdtree(this->root);
+        this->_delete_kdtree (this->root);
 }
 
 void KDTree::_delete_kdtree (struct KDTreeNode *root)
@@ -22,7 +34,7 @@ void KDTree::_delete_kdtree (struct KDTreeNode *root)
         delete root;
 }
 
-struct KDTree::KDTreeNode *KDTree::_insert_depth (struct KDTreeNode *root, Vec3 node, int depth)
+struct KDTree::KDTreeNode *KDTree::_insert_depth (struct KDTreeNode *root, Vec3 node, BoundingBox box, int depth)
 {
         int dim_index = depth % 3;
 
@@ -31,21 +43,55 @@ struct KDTree::KDTreeNode *KDTree::_insert_depth (struct KDTreeNode *root, Vec3 
                 child->left = nullptr;
                 child->right = nullptr;
                 child->value = node;
+                child->bbox = box;
                 return child;
         }
 
+        std::pair<BoundingBox, BoundingBox> boxes = box.split (dim_index, root->value[dim_index]);
+
         if (node[dim_index] < root->value[dim_index]) {
-                root->left = this->_insert_depth (root->left, node, depth + 1);
+                root->left = this->_insert_depth (root->left, node, boxes.first, depth + 1);
         } else {
-                root->right = this->_insert_depth (root->right, node, depth + 1);
+                root->right = this->_insert_depth (root->right, node, boxes.second, depth + 1);
         }
 
         return root;
 }
 
+struct KDTree::KDTreeNode *KDTree::_construct_from_list (std::vector<Vec3> points, BoundingBox box, int depth)
+{
+        if (points.empty ()) {
+                return nullptr;
+        }
+
+        int dim_index = depth % 3;
+        Vec3 median_point = this->_median_select (points, dim_index);
+
+        std::vector<Vec3> left_points;
+        std::vector<Vec3> right_points;
+
+        for (auto &point : points) {
+                if (point[dim_index] < median_point[dim_index]) {
+                        left_points.push_back (point);
+                } else if (point != median_point) {
+                        right_points.push_back (point);
+                }
+        }
+
+        std::pair<BoundingBox, BoundingBox> boxes = box.split (dim_index, median_point[dim_index]);
+
+        struct KDTreeNode *node = new struct KDTreeNode;
+        node->value = median_point;
+        node->bbox = box;
+        node->left = this->_construct_from_list (left_points, boxes.first, depth + 1);
+        node->right = this->_construct_from_list (right_points, boxes.second, depth + 1);
+
+        return node;
+}
+
 void KDTree::insert (Vec3 node)
 {
-        this->root = this->_insert_depth (this->root, node, 0);
+        this->root = this->_insert_depth (this->root, node, BoundingBox (), 0);
 }
 
 Vec3 KDTree::_closest_to (Vec3 target, Vec3 a, Vec3 b)
@@ -111,4 +157,77 @@ Vec3 KDTree::_nn (Vec3 node, Vec3 best, struct KDTreeNode *root, int depth)
 Vec3 KDTree::nearest_neighbour (Vec3 node)
 {
         return this->_nn (node, this->root->value, this->root, 0);
+}
+
+Vec3 KDTree::_median_select (std::vector<Vec3> points, int axis)
+{
+        if (points.size () == 1)
+                return points[0];
+
+        int median = points.size () / 2;
+
+        std::nth_element (points.begin (), points.begin () + median, points.end (), [axis] (Vec3 a, Vec3 b) {
+                return a[axis] < b[axis];
+        });
+
+        return points[median];
+}
+
+std::pair<KDTree::BoundingBox, KDTree::BoundingBox> KDTree::BoundingBox::split (int axis, double value)
+{
+        BoundingBox left = *this;
+        BoundingBox right = *this;
+
+        left.max[axis] = value;
+        right.min[axis] = value;
+
+        return std::make_pair (left, right);
+}
+
+bool KDTree::BoundingBox::hit (Ray r)
+{
+        double _;
+
+        for (int dim_i = 0; dim_i < 3 - 1; dim_i++) {
+                Vec3 dim_i_vector = Vec3 (0, 0, 0);
+                dim_i_vector[dim_i] = 1;
+                for (int dim_j = dim_i + 1; dim_j < 3; dim_j++) {
+                        Vec3 dim_j_vector = Vec3 (0, 0, 0);
+                        dim_j_vector[dim_j] = 1;
+
+                        double u_length = this->max[dim_i] - this->min[dim_i];
+                        double v_length = this->max[dim_j] - this->min[dim_j];
+
+                        if (hit_box (this->min, dim_i_vector, dim_j_vector, u_length, v_length, r, _, _, _))
+                                return true;
+
+                        if (hit_box (this->max, -dim_i_vector, -dim_j_vector, u_length, v_length, r, _, _, _))
+                                return true;
+                }
+        }
+
+        return false;
+}
+
+std::vector<Vec3> KDTree::_bounding_box_hit (struct KDTreeNode *root, Ray r)
+{
+        if (!root || !root->bbox.hit (r))
+                return std::vector<Vec3> ();
+
+        if (!root->left && !root->right)
+                return std::vector<Vec3> ({ root->value });
+
+        std::vector<Vec3> left_points = this->_bounding_box_hit (root->left, r);
+
+        std::vector<Vec3> right_points = this->_bounding_box_hit (root->right, r);
+
+        left_points.emplace_back (root->value);
+        left_points.insert (left_points.end (), right_points.begin (), right_points.end ());
+
+        return left_points;
+}
+
+std::vector<Vec3> KDTree::hit_bbox (Ray r)
+{
+        return this->_bounding_box_hit (this->root, r);
 }
