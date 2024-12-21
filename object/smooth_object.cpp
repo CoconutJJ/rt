@@ -2,17 +2,22 @@
 #include "mat3.hpp"
 #include "material.hpp"
 #include "object.hpp"
-#include "ray.hpp"
 #include "vec3.hpp"
 #include <stdexcept>
+
+SmoothObject::SmoothObject (Vec3 location, Material *material) : Object (location, material)
+{
+}
 
 SmoothObject::SmoothObject (Vec3 location1, Vec3 location2, Material *material)
         : Object (location1, location2, material)
 {
 }
 
-SmoothObject::SmoothObject (Vec3 location, Material *material) : Object (location, material)
+SmoothObject::SmoothObject (Vec3 location1, Vec3 location2, Material *material, Texture *normal_map)
+        : Object (location1, location2, material)
 {
+        this->mat->normal_map = normal_map;
 }
 
 bool SmoothObject::is_light_source ()

@@ -14,9 +14,9 @@ Vec3::Vec3 (double x, double y, double z) : x (x), y (y), z (z)
         return;
 }
 
-std::ostream &operator<< (std::ostream &out, Vec3 &v)
+std::ostream &operator<< (std::ostream &out, Vec3 v)
 {
-        return out << v.x << ' ' << v.y << ' ' << v.z;
+        return out << v.x << ",\t" << v.y << ",\t" << v.z;
 }
 
 Vec3 Vec3::operator+ (Vec3 a)
@@ -98,7 +98,7 @@ bool Vec3::operator== (Vec3 b)
         return (this->x == b.x) && (this->y == b.y) && (this->z == b.z);
 }
 
-bool Vec3::operator< (Vec3 b)
+bool Vec3::operator< (Vec3 b) const
 {
         for (int i = 0; i < 3; i++) {
                 if ((*this)[i] == b[i])
@@ -221,6 +221,17 @@ Vec3 Vec3::inf ()
 }
 
 double &Vec3::operator[] (int index)
+{
+        switch (index) {
+        case 0: return this->x;
+        case 1: return this->y;
+        case 2: return this->z;
+        }
+
+        throw std::logic_error ("error: invalid dimension!");
+}
+
+double Vec3::operator[] (int index) const
 {
         switch (index) {
         case 0: return this->x;

@@ -11,6 +11,9 @@ Triangle::Triangle (Vec3 point, Vec3 u, Vec3 v, Material *material) : Plane (poi
 Triangle::Triangle (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) : Plane (p1, p2, p3, normal, material)
 {
 }
+Triangle::~Triangle ()
+{
+}
 
 bool Triangle::inside (Vec3 point)
 {

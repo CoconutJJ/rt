@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 class Vec3 {
     public:
         double x;
@@ -19,8 +20,9 @@ class Vec3 {
         Vec3 operator-= (Vec3 b);
         Vec3 operator*= (double d);
         bool operator== (Vec3 b);
-        bool operator< (Vec3 b);
+        bool operator< (Vec3 b) const;
         double &operator[] (int dim);
+        double operator[] (int index) const;
         double dot (Vec3 b);
         double length_squared ();
         double length ();
@@ -37,6 +39,7 @@ class Vec3 {
         static Vec3 inf ();
         Vec3 rotate (Vec3 axis, double angle);
         friend Vec3 operator* (double scalar, Vec3 a);
+        friend std::ostream &operator<< (std::ostream &out, Vec3 v);
 
     private:
         double argument (double y_opp, double x_adj);

@@ -9,4 +9,4 @@ ARGUMENTS:
 -h | --help                 Show this help message
 -n | --nthreads             Multithreading (default: OS suggested value)
 -a | --arealight_samples    Number of samples for area light
--p | --path_tracer          Use path tracer instead of default ray tracer
+-p | --use_path_tracer          Use path tracer instead of default ray tracer

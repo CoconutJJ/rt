@@ -1,5 +1,7 @@
 #include "object.hpp"
-
+Object::Object ()
+{
+}
 Object::Object (Vec3 location1, Vec3 location2, Material *material)
         : location (location1), location2 (location2), mat (material)
 {

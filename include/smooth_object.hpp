@@ -21,10 +21,8 @@
  */
 
 #pragma once
-#include "hitrecord.hpp"
 #include "material.hpp"
 #include "object.hpp"
-#include "ray.hpp"
 #include "texture.hpp"
 #include "vec3.hpp"
 
@@ -33,12 +31,12 @@ class SmoothObject : public Object {
         SmoothObject (Vec3 location, Material *material);
         SmoothObject (Vec3 location1, Vec3 location2, Material *material);
         SmoothObject (Vec3 location1, Vec3 location2, Material *material, Texture *normal_map);
-        bool hit (Ray r, HitRecord &record) override;
         bool is_light_source () override;
 
         virtual Vec3 tangent (Vec3 point) = 0;
         virtual Vec3 normal (Vec3 point) = 0;
         virtual Vec3 to_uv (Vec3 point) = 0;
+
         Vec3 mapped_normal (Vec3 point);
         Mat3 tbn (Vec3 point);
         Mat3 tnb (Vec3 point);

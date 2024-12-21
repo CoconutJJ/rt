@@ -55,6 +55,9 @@ bool hit_box (Vec3 point,
 
         double _lambda = top / bottom;
 
+        if (_lambda < 0)
+                return false;
+
         Vec3 hit_point = r.at (_lambda);
 
         Vec3 n = v.cross (u);
@@ -66,7 +69,6 @@ bool hit_box (Vec3 point,
         double _alpha = v.cross (plane_vector).dot (n);
         double _beta = u.cross (plane_vector).dot (-n);
 
-        // The following code
         lambda = _lambda;
         alpha = _alpha;
         beta = _beta;
@@ -101,7 +103,7 @@ Mat3 texture_projection_matrix (Vec3 xy1, Vec3 xy2, Vec3 xy3, Vec3 uv1, Vec3 uv2
         Mat3 basis = Mat3 (v1, v2, Vec3 (0, 0, 0));
 
         // bTb_adj is the adjugate of the matrix bTb, where b is the matrix with columns v1 and v2.
-        Mat3 bTb_adj = Mat3 (Vec3 (v2sq, -v1v2, 0), Vec3 (-v1v2, v1sq, 0), Vec3 (0, 0, 0));
+        Mat3 bTb_adj = Mat3 (Vec3 (v2sq, -v1v2, 0), Vec3 (-v1v2, v1sq, 0), Vec3 (0, 0, 0)).transpose ();
 
         Mat3 uv_basis = Mat3 (u, v, Vec3 (0, 0, 0));
 

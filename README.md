@@ -1,6 +1,7 @@
 # rt: a ray tracer
 
-Working on a ray tracer to learn about computer graphics.
+Working on a ray tracer to learn about computer graphics. This project is still
+very much work in progress!
 
 Currently includes:
 - Planes, Quads, Spheres
@@ -10,24 +11,62 @@ Currently includes:
 - Path Tracing
 
 Still need to add:
-- Obj File Parser/Loader
 - Scene File Parser/Loader
+- Support for Meshes
 
 ## How to run
 
-To compile `rt`, run the following commands
+This project is using CMake. To configure build directory:
 
 ```
-$ chmod u+x BUILD.sh
-$ ./BUILD.sh
-$ ./bin/rt ...
+$ cmake -S . -B build
 ```
+
+and to compile run:
+
+```
+$ cd build/
+$ make rt
+```
+
+To use `rt`:
+
+```
+usage: rt [ARGUMENTS]
+
+ARGUMENTS:
+-f | --out_file             PPM image output file name
+-w | --image_width          PPM image width
+-r | --aspect_ratio         Aspect ratio of image (default: 16/9, height = width / aspect_ratio)
+-v | --vfov                 Vertical Field of View (default: 90, FOV in degrees)
+-t | --defocus_angle        Defocus blur lens radius (default: 0.0 - no blur),
+-h | --help                 Show this help message
+-n | --nthreads             Multithreading (default: OS suggested value)
+-a | --arealight_samples    Number of samples for area light
+-p | --use_path_tracer      Use path tracer instead of default ray tracer
+```
+
 In order to test the normal maps, I also created a tool that converts height 
-maps to normal maps. It will also be compiled when you run `BUILD.sh`. To use
-this conversion tool, run:
+maps to normal maps. To compile this conversion tool, run:
+
 ```
-$ ./bin/height_map_conv ...
+$ make height_map_conv
 ```
+
+This tool converts the height map into a +z normal map - +z is the normal direction
+
+### Running Tests
+
+This project uses Catch2 for unit testing. All unit tests can be found in the 
+`tests/` directory.
+
+
+To build the testing suite, use:
+```
+$ make tests
+```
+
+The testing executables are located at `bin/test_*`.
 
 ## Knowledge Resources
 
@@ -62,3 +101,4 @@ Path Tracing is working!
 <img src="static/iter5.png" width=500/>
 
 <img src="static/iter6.png" width=500/>
+

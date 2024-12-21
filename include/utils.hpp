@@ -1,7 +1,7 @@
 #pragma once
+#include "mat3.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
-
 double clamp (double min, double x, double max);
 double random_double (double min, double max);
 double deg2rad (double deg);
@@ -15,3 +15,4 @@ bool hit_box (Vec3 point,
               double &alpha,
               double &beta,
               double &lambda);
+Mat3 texture_projection_matrix (Vec3 xy1, Vec3 xy2, Vec3 xy3, Vec3 uv1, Vec3 uv2, Vec3 uv3);
