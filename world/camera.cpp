@@ -34,7 +34,7 @@ void Camera::initialize (struct RendererSettings settings)
         this->arealight_samples = settings.arealight_samples;
 
         this->lookat = Vec3 (0, -1, -1);
-        this->center = Vec3 (0, -1, 3);
+        this->center = Vec3 (1, -1, 3);
         this->focus_dist = 1;
 
         this->max_depth = 10;
@@ -220,8 +220,8 @@ void Camera::set_output_file (const char *filename)
 
 void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
 {
-        std::ofstream file_stream = std::ofstream (std::string (filename));
-        this->stream.rdbuf (file_stream.rdbuf ());
+        std::ofstream *file_stream = new std::ofstream (std::string (filename));
+        this->stream.rdbuf (file_stream->rdbuf ());
 
         this->stream << "P3\n"
                      << this->image_width << ' ' << this->image_height << "\n"
@@ -278,12 +278,18 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                 this->write_color (pixel_color);
 
         std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
+
 }
 
 void Camera::render (World *world, const char *filename)
 {
-        this->set_output_file (filename);
+        std::ofstream *file_stream = new std::ofstream (std::string (filename));
+        this->stream.rdbuf (file_stream->rdbuf ());
 
+        this->stream << "P3\n"
+                     << this->image_width << ' ' << this->image_height << "\n"
+                     << "255"
+                     << "\n";
         progressbar bar (image_height);
 
         for (int j = 0; j < this->image_height; j++) {
@@ -296,8 +302,10 @@ void Camera::render (World *world, const char *filename)
                                 pixel_color += this->use_path_tracer ? this->path_color (r, world, this->max_depth) :
                                                                        this->ray_color (r, world, this->max_depth);
                         }
-                        pixel_color *= 1.0 / double (this->samples_per_pixel);
+                        pixel_color /= double (this->samples_per_pixel);
                         this->write_color (pixel_color);
                 }
         }
+
+        
 }

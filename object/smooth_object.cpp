@@ -27,6 +27,9 @@ bool SmoothObject::is_light_source ()
 
 Vec3 SmoothObject::mapped_normal (Vec3 point)
 {
+        if (!this->mat)
+                return this->normal(point);
+        
         if (!this->mat->normal_map)
                 return this->normal (point);
 

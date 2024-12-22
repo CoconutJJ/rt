@@ -1,8 +1,8 @@
 #include "plane.hpp"
+#include "hitrecord.hpp"
 #include "material.hpp"
 #include "smooth_object.hpp"
 #include "vec3.hpp"
-
 Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
 {
         if (normal.x != 0)
@@ -35,7 +35,7 @@ Plane::Plane (Vec3 location, Vec3 u, Vec3 v, Material *material) : SmoothObject 
 Plane::Plane (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) : SmoothObject (p1, material)
 {
         this->u = (p2 - p1).unit ();
-        this->v = (p3 - p2).unit ();
+        this->v = (p3 - p1).unit ();
 
         // we assume normal vector is correct.
         this->n = normal;

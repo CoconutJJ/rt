@@ -36,6 +36,7 @@ class KDTree {
         std::vector<Vec3> hit_bbox (Ray r);
 
     private:
+        BoundingBox _compute_bounding_box(std::vector<Vec3> points);
         std::vector<Vec3> _bounding_box_hit (struct KDTreeNode *root, Ray r);
         Vec3 _median_select (std::vector<Vec3> points, int axis);
         void _delete_kdtree (struct KDTreeNode *root);

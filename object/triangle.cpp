@@ -2,17 +2,34 @@
 #include "hitrecord.hpp"
 #include "material.hpp"
 #include "ray.hpp"
+#include "smooth_object.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 
-Triangle::Triangle (Vec3 point, Vec3 u, Vec3 v, Material *material) : Plane (point, u, v, material)
+Triangle::Triangle (Vec3 point, Vec3 u, Vec3 v, Material *material) : SmoothObject (point, material)
 {
+        this->u = u;
+        this->v = v;
+        this->n = u.cross (v);
 }
 
-Triangle::Triangle (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) : Plane (p1, p2, p3, normal, material)
+Triangle::Triangle (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) : SmoothObject (p1, material)
 {
+        this->u = p2 - p1;
+        this->v = p3 - p1;
+        this->n = normal;
 }
 Triangle::~Triangle ()
 {
+}
+
+void Triangle::center (Vec3 point)
+{
+        Vec3 center = (3 * this->location + this->u + this->v) / 3;
+
+        Vec3 delta = point - center;
+
+        this->location += delta;
 }
 
 bool Triangle::inside (Vec3 point)
@@ -31,8 +48,13 @@ bool Triangle::inside (Vec3 point)
 
 bool Triangle::hit (Ray r, HitRecord &record)
 {
-        if (!this->hit_point (r, record.hit_point, record.lambda))
+        double alpha, beta;
+
+        if (!hit_box (this->location, this->u, this->v, 1, 1, r, alpha, beta, record.lambda))
                 return false;
+
+        record.hit_point = r.at (record.lambda);
+        record.uv = this->to_uv (record.hit_point);
 
         if (!this->inside (record.hit_point))
                 return false;
@@ -42,4 +64,28 @@ bool Triangle::hit (Ray r, HitRecord &record)
         record.obj = this;
 
         return true;
+}
+
+void Triangle::load_texture_coordinates (Vec3 t1, Vec3 t2, Vec3 t3)
+{
+        this->t1 = t1;
+        this->t2 = t2;
+        this->t3 = t3;
+        this->T = texture_projection_matrix (
+                this->location, this->location + this->u, this->location + this->v, t1, t2, t3);
+}
+
+Vec3 Triangle::to_uv (Vec3 point)
+{
+        return this->T * (point - this->location) + this->t1;
+}
+
+Vec3 Triangle::tangent (Vec3 point)
+{
+        return this->u;
+}
+
+Vec3 Triangle::normal (Vec3 point)
+{
+        return this->n;
 }

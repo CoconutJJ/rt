@@ -4,6 +4,7 @@
 #include "vec3.hpp"
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
 
 double clamp (double min, double x, double max)
 {
@@ -45,33 +46,28 @@ bool hit_box (Vec3 point,
               double &beta,
               double &lambda)
 {
-        Vec3 normal = u.cross (-v);
-        double top = normal.dot (point - r.origin);
 
-        double bottom = normal.dot (r.direction);
-
-        if (bottom == 0.0)
+        Vec3 n = u.cross(v);
+        
+        if (std::abs(n.dot(r.direction)) < 1e-8)
                 return false;
 
-        double _lambda = top / bottom;
-
+        double _lambda = n.dot(point - r.origin) / n.dot(r.direction);
+        
         if (_lambda < 0)
                 return false;
 
-        Vec3 hit_point = r.at (_lambda);
+        Vec3 hit_point = r.at(_lambda);
 
-        Vec3 n = v.cross (u);
-
-        n /= n.length_squared ();
-
-        Vec3 plane_vector = hit_point - point;
-
-        double _alpha = v.cross (plane_vector).dot (n);
-        double _beta = u.cross (plane_vector).dot (-n);
+        
+        double _alpha = v.cross(hit_point - point).dot(n) / v.cross(u).dot(n);
+        double _beta = u.cross(hit_point - point).dot(n) / u.cross(v).dot(n);
 
         lambda = _lambda;
         alpha = _alpha;
         beta = _beta;
+        
+        // std::cerr << "AB:" << n << point << r.origin << std::endl;
 
         return (0 <= _alpha && _alpha <= u_length) && (0 <= _beta && _beta <= v_length);
 }

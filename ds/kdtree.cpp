@@ -1,7 +1,10 @@
 #include "kdtree.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
+#include <algorithm>
+#include <cfloat>
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 
 KDTree::KDTree () : root (nullptr)
@@ -13,14 +16,28 @@ KDTree::KDTree () : root (nullptr)
         the points ahead of time, this will ensure the tree is well balanced.
 
 */
-KDTree::KDTree (std::vector<Vec3> points)
+KDTree::KDTree (std::vector<Vec3> points) : root (nullptr)
 {
-        this->root = this->_construct_from_list (points, BoundingBox (), 0);
+        this->root = this->_construct_from_list (points, BoundingBox (this->_compute_bounding_box (points)), 0);
 }
 
 KDTree::~KDTree ()
 {
         this->_delete_kdtree (this->root);
+}
+
+KDTree::BoundingBox KDTree::_compute_bounding_box (std::vector<Vec3> points)
+{
+        BoundingBox box (points[0], points[0]);
+
+        for (Vec3 &vertex : points) {
+                for (int i = 0; i < 3; i++) {
+                        box.min[i] = std::min (box.min[i], vertex[i]);
+                        box.max[i] = std::max (box.max[i], vertex[i]);
+                }
+        }
+
+        return box;
 }
 
 void KDTree::_delete_kdtree (struct KDTreeNode *root)
@@ -60,9 +77,8 @@ struct KDTree::KDTreeNode *KDTree::_insert_depth (struct KDTreeNode *root, Vec3 
 
 struct KDTree::KDTreeNode *KDTree::_construct_from_list (std::vector<Vec3> points, BoundingBox box, int depth)
 {
-        if (points.empty ()) {
+        if (points.empty ())
                 return nullptr;
-        }
 
         int dim_index = depth % 3;
         Vec3 median_point = this->_median_select (points, dim_index);
@@ -196,7 +212,23 @@ bool KDTree::BoundingBox::hit (Ray r)
                         dim_j_vector[dim_j] = 1;
 
                         double u_length = this->max[dim_i] - this->min[dim_i];
+
+                        if (this->max[dim_i] == DBL_MAX)
+                                u_length = DBL_MAX;
+
+                        else if (this->min[dim_i] == -DBL_MAX)
+                                u_length = DBL_MAX;
+
                         double v_length = this->max[dim_j] - this->min[dim_j];
+
+                        if (this->max[dim_j] == DBL_MAX)
+                                v_length = DBL_MAX;
+
+                        else if (this->min[dim_j] == -DBL_MAX)
+                                v_length = DBL_MAX;
+
+                        // if (u_length != DBL_MAX || v_length != DBL_MAX)
+                        //         std::cerr << u_length << ", " << v_length << std::endl;
 
                         if (hit_box (this->min, dim_i_vector, dim_j_vector, u_length, v_length, r, _, _, _))
                                 return true;

@@ -15,7 +15,7 @@ World::World ()
 {
 }
 
-void World::add (SmoothObject *obj)
+void World::add (Object *obj)
 {
         this->objects.push_back (obj);
 }
@@ -34,7 +34,7 @@ bool World::hit (Ray r, HitRecord &record)
 
         bool hit_anything = false;
 
-        for (SmoothObject *obj : this->objects) {
+        for (Object *obj : this->objects) {
                 if (!obj->hit (r, curr_record))
                         continue;
 
@@ -48,7 +48,7 @@ bool World::hit (Ray r, HitRecord &record)
         return hit_anything;
 }
 
-bool World::has_path (Ray r, SmoothObject *obj)
+bool World::has_path (Ray r, Object *obj)
 {
         HitRecord obj_rec;
         if (!obj->hit (r, obj_rec))
@@ -56,7 +56,7 @@ bool World::has_path (Ray r, SmoothObject *obj)
 
         double lambda_min = 0.001;
 
-        for (SmoothObject *curr : this->objects) {
+        for (Object *curr : this->objects) {
                 if (curr == obj)
                         continue;
 

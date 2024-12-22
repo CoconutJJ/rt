@@ -3,6 +3,7 @@
 #include "checkerboard.hpp"
 #include "dielectric.hpp"
 #include "lambertian.hpp"
+#include "mesh.hpp"
 #include "phong.hpp"
 #include "plane.hpp"
 #include "point_light.hpp"
@@ -11,6 +12,7 @@
 #include "solid_texture.hpp"
 #include "sphere.hpp"
 #include "termcolor.hpp"
+#include "triangle.hpp"
 #include "usage.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
@@ -175,12 +177,12 @@ int main (int argc, char **argv)
         glass.brdf = &brdf;
         Lambertian lamb (Vec3 (1, 1, 1));
         lamb.brdf = &brdf;
-        lamb.emission (Vec3 (100, 100, 100));
+        lamb.emission (Vec3 (500, 500, 500));
 
         Lambertian lamb2 (Vec3 (0.8, 0.2, 0.2));
         lamb2.brdf = &brdf;
 
-        Quad light_panel (Vec3 (-1, 0, -1), Vec3 (-1, 0, 0), Vec3 (0, 0, 1), &lamb);
+        Quad light_panel (Vec3 (-1, 0, -1), Vec3 (-3, 0, 0), Vec3 (0, 0, 3), &lamb);
         Sphere sp (Vec3 (-1, -1.5, -1), 0.5, &glass);
 
         CheckerboardTexture checkerboard (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
@@ -188,7 +190,10 @@ int main (int argc, char **argv)
         background.brdf = &brdf;
 
         Plane p (Vec3 (0, -2, 0), Vec3 (0, 1, 0), &background);
-        world.add (&sp);
+
+        Mesh m ("assets/sphere.obj", Vec3 (-1, -1.5, -1), &glass);
+        Triangle t(Vec3 (-1, -1, -1), Vec3(-1,0,0), Vec3(0,-0.5,0), &background);
+        world.add (&m);
         world.add (&light_panel);
         world.add (&p);
 
