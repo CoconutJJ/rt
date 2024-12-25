@@ -1,5 +1,4 @@
 #pragma once
-#include "BRDF.hpp"
 #include "mat3.hpp"
 #include "ray.hpp"
 #include "texture.hpp"
@@ -13,7 +12,6 @@ class Material {
         Material (Texture *texture, Texture *normal_map);
         Texture *texture;
         Texture *normal_map;
-        BRDF *brdf;
         Vec3 emission_value;
         struct PhongParams {
                 double rs;
@@ -27,7 +25,7 @@ class Material {
                 Vec3 color;
         };
 
-        virtual Vec3 scatter (Ray r, HitRecord &record, Vec3 &brdf)
+        virtual Vec3 scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
         {
                 return Vec3 (0, 0, 0);
         }
@@ -39,6 +37,6 @@ class Material {
         virtual bool is_emissive ();
         virtual void emission (Vec3 color);
         virtual Vec3 color (HitRecord &record);
-        virtual Vec3 emission (Ray r, HitRecord &record);
+        virtual Vec3 emission ();
         virtual Vec3 normal (Mat3 tbn, Vec3 n, Vec3 uv);
 };

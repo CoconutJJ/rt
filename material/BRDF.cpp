@@ -19,6 +19,7 @@
 // UPDATES, ENHANCEMENTS OR MODIFICATIONS.
 
 #include "BRDF.hpp"
+#include "hitrecord.hpp"
 #include "mat3.hpp"
 #include "math.h"
 #include "stdlib.h"
@@ -269,4 +270,16 @@ Vec3 BRDF::compute (Mat3 tnb, Vec3 in_direction, Vec3 out_direction)
         lookup_brdf_val (this->brdf, in_sph_coords.z, in_sph_coords.y, out_sph_coords.z, out_sph_coords.y, r, g, b);
 
         return Vec3 (r, g, b);
+}
+
+Vec3 BRDF::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
+{
+        Vec3 direction = Vec3::random_hemisphere ();
+        ray_prob = 1;
+
+        Mat3 tnb = record.object->tnb (record);
+
+        brdf = this->compute (tnb, r.direction, direction);
+
+        return direction;
 }

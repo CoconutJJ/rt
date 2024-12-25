@@ -9,9 +9,25 @@ Vec3::Vec3 () : x (0), y (0), z (0)
 {
 }
 
+Vec3::Vec3 (const Vec3 &other)
+{
+        this->x = other.x;
+        this->y = other.y;
+        this->z = other.z;
+}
+
 Vec3::Vec3 (double x, double y, double z) : x (x), y (y), z (z)
 {
         return;
+}
+
+Vec3 &Vec3::operator= (Vec3 other)
+{
+        this->x = other.x;
+        this->y = other.y;
+        this->z = other.z;
+
+        return *this;
 }
 
 std::ostream &operator<< (std::ostream &out, Vec3 v)
@@ -145,12 +161,7 @@ Vec3 Vec3::clamp (double min, double max)
 
 Vec3 Vec3::random ()
 {
-        while (true) {
-                Vec3 v = Vec3 (random_double (-1, 1), random_double (-1, 1), random_double (-1, 1));
-
-                if (v.length_squared () > 1e-160 && v.length_squared () < 1.0)
-                        return v;
-        }
+        return Vec3 (random_double (-1, 1), random_double (-1, 1), random_double (-1, 1)).unit ();
 }
 
 Vec3 Vec3::reflect (Vec3 normal)
@@ -165,11 +176,12 @@ bool Vec3::near_zero ()
 
 Vec3 Vec3::refract (Vec3 n, double mu)
 {
-        double c = -this->dot (n);
+        Vec3 l = this->unit ();
 
-        Vec3 dir = *this * mu + n * (mu * c - std::sqrt (1 - mu * mu * (1 - c * c)));
+        n = -n.unit ();
 
-        return dir;
+        return mu * l + (n * sqrt(1 - mu * mu * (1 - (n.dot(l) * n.dot(l))))) - (mu * (n.dot(l)) * n);
+
 }
 
 Vec3 Vec3::zero ()
@@ -182,6 +194,11 @@ Vec3 Vec3::rotate (Vec3 axis, double angle)
         // Rodrigues' formula
         return *this * std::cos (angle) + (axis.cross (*this)) * std::sin (angle) +
                axis * (axis.dot (*this)) * (1 - std::cos (angle));
+}
+
+Vec3 Vec3::random_hemisphere ()
+{
+        return Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv();
 }
 
 double Vec3::argument (double y_opp, double x_adj)

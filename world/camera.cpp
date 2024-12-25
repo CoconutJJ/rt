@@ -2,6 +2,7 @@
 #include "hitrecord.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include "object.hpp"
 #include "progress_bar.hpp"
 #include "ray.hpp"
 #include "utils.hpp"
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -18,8 +20,9 @@
 #include <sys/ioctl.h>
 #include <thread>
 #include <unistd.h>
+#include <vector>
 
-Camera::Camera () : pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), center (0, 0, 0), stream (std::cout)
+Camera::Camera () : stream (std::cout), pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), center (0, 0, 0)
 {
 }
 
@@ -33,11 +36,11 @@ void Camera::initialize (struct RendererSettings settings)
         this->use_path_tracer = settings.use_path_tracer;
         this->arealight_samples = settings.arealight_samples;
 
-        this->lookat = Vec3 (0, -1, -1);
-        this->center = Vec3 (1, -1, 3);
+        this->lookat = Vec3 (0, 1, -1);
+        this->center = Vec3 (0, 1.3, 2); // (1, 1, 4)
         this->focus_dist = 1;
 
-        this->max_depth = 10;
+        this->max_depth = 5;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
         this->viewport_width = this->viewport_height * (double (this->image_width) / this->image_height);
@@ -101,7 +104,6 @@ Vec3 Camera::sample_light_rays (World *world,
 
         /**
                 We use the Blinn-Phong Lighting Model for the ray tracer.
-
          */
 
         for (int i = 0; i < light_num_samples; i++) {
@@ -143,9 +145,9 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
                 return Vec3 (0, 0, 0);
 
         if (depth == 0)
-                return record.mat->texture->read_texture_uv (record.uv, record.hit_point);
+                return record.object->material->texture->read_texture_uv (record.uv, record.hit_point);
 
-        Material::PhongParams params = record.mat->phong (r, record);
+        Material::PhongParams params = record.object->material->phong (r, record);
 
         Vec3 color = Vec3 (1, 1, 1) * params.ra * params.color;
 
@@ -185,6 +187,93 @@ void Camera::write_color (Vec3 color)
         this->stream << int (color.x) << ' ' << int (color.y) << ' ' << int (color.z) << '\n';
 }
 
+Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
+{
+        SmoothObject *light = world->random_light ();
+
+        Vec3 light_point = light->sample_point ();
+
+        if (!world->has_path (record.hit_point, light_point))
+                return Vec3::zero ();
+
+        hit_light = light;
+
+        Vec3 to_light = light_point - record.hit_point;
+
+        double light_area = light->area ();
+
+        double light_distance = to_light.length ();
+
+        double foreshortening_factor = -to_light.unit ().dot (light->normal (light_point).unit ());
+
+        double ray_prob = fmax (0,
+                                (light_area * foreshortening_factor * to_light.unit ().dot (record.normal)) /
+                                        (light_distance * light_distance * 2 * M_PI));
+
+        return light->material->emission () * ray_prob * record.object->material->color (record);
+}
+
+Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
+{
+        std::vector<Vec3> radiances;
+        std::vector<Vec3> throughput;
+
+        for (int i = 0; i < depth; i++) {
+                HitRecord record;
+
+                if (!world->hit (starting_ray, record))
+                        break;
+
+                Vec3 brdf;
+                double pdf;
+                Vec3 scatter_dir = record.object->material->scatter (starting_ray, record, brdf, pdf);
+                double foreshortening_factor = -starting_ray.direction.unit ().dot (record.normal.unit ());
+
+                Vec3 radiance = record.object->material->emission ();
+
+                throughput.push_back (brdf * foreshortening_factor * record.object->material->color (record) / pdf);
+
+                starting_ray = Ray (record.hit_point, scatter_dir);
+
+                SmoothObject *light;
+
+                Vec3 light_sample = this->sample_light (world, record, light);
+
+                if (light_sample != Vec3::zero ()) {
+                        HitRecord next_record;
+
+                        if (world->hit (starting_ray, next_record)) {
+                                if (next_record.object != light) {
+                                        radiance += light_sample;
+                                }
+                        } else {
+                                radiance += light_sample;
+                        }
+                }
+
+                radiances.emplace_back (radiance);
+
+                if (record.object->material->is_emissive ())
+                        break;
+        }
+        Vec3 total_radiance (0, 0, 0);
+
+        std::vector<Vec3> throughput_partial_products{ Vec3 (1, 1, 1) };
+
+        Vec3 throughput_product (1, 1, 1);
+
+        for (int j = 0; j < radiances.size (); j++) {
+                throughput_product = throughput_product * throughput[j];
+                throughput_partial_products.push_back (throughput_product);
+        }
+
+        for (int i = 0; i < radiances.size (); i++) {
+                total_radiance += radiances[i] * throughput_partial_products[i];
+        }
+
+        return total_radiance;
+}
+
 Vec3 Camera::path_color (Ray r, World *world, int depth)
 {
         if (depth == 0)
@@ -198,12 +287,18 @@ Vec3 Camera::path_color (Ray r, World *world, int depth)
         Vec3 in_direction = r.direction;
 
         Vec3 brdf;
-        Ray scatter_ray (record.hit_point, record.mat->scatter (r, record, brdf));
+        double ray_prob = 1;
+        Vec3 direction = record.object->material->scatter (r, record, brdf, ray_prob);
+        Ray scatter_ray (record.hit_point + direction.unit() * 0.001, direction);
+
+        size_t light_source_idx = rand () % world->emissives.size ();
+
+        Object *light_source = world->emissives[light_source_idx];
 
         Vec3 scatter_color = this->path_color (scatter_ray, world, depth - 1);
 
-        return record.mat->emission (r, record) +
-               scatter_color * brdf * record.normal.dot (-in_direction.unit ()) * record.mat->color (record);
+        return record.object->material->emission () + scatter_color * brdf * record.normal.dot (-in_direction.unit ()) *
+                                                              record.object->material->color (record) / ray_prob;
 }
 
 void Camera::set_output_file (const char *filename)
@@ -243,7 +338,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                                                            j + random_double (-0.5, 0.5));
 
                                         pixel_color += this->use_path_tracer ?
-                                                               this->path_color (r, world, this->max_depth) :
+                                                               this->single_path_color (r, world, this->max_depth) :
                                                                this->ray_color (r, world, this->max_depth);
                                 }
 
@@ -278,7 +373,6 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                 this->write_color (pixel_color);
 
         std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
-
 }
 
 void Camera::render (World *world, const char *filename)
@@ -306,6 +400,4 @@ void Camera::render (World *world, const char *filename)
                         this->write_color (pixel_color);
                 }
         }
-
-        
 }

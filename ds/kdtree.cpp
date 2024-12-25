@@ -3,6 +3,7 @@
 #include "vec3.hpp"
 #include <algorithm>
 #include <cfloat>
+#include <cstddef>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -24,6 +25,39 @@ KDTree::KDTree (std::vector<Vec3> points) : root (nullptr)
 KDTree::~KDTree ()
 {
         this->_delete_kdtree (this->root);
+}
+
+KDTree::KDTree(const KDTree& kdtree) {
+
+        if (this->root)
+                this->_delete_kdtree(this->root);
+
+        this->root = this->_copy_tree(kdtree.root);
+}
+
+KDTree& KDTree::operator=(const KDTree &other) {
+
+        if (this->root)
+                this->_delete_kdtree(this->root);
+
+        this->root = this->_copy_tree(other.root);
+
+        return *this;
+}
+
+struct KDTree::KDTreeNode *KDTree::_copy_tree(struct KDTree::KDTreeNode *root) {
+
+        if (!root)
+                return nullptr;
+
+        struct KDTreeNode *new_root = new struct KDTreeNode;
+
+        *new_root = *root;
+
+        new_root->left = this->_copy_tree(root->left);
+        new_root->right = this->_copy_tree(root->right);
+
+        return new_root;
 }
 
 KDTree::BoundingBox KDTree::_compute_bounding_box (std::vector<Vec3> points)

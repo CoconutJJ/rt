@@ -7,6 +7,22 @@ Mat3::Mat3 (Vec3 c1, Vec3 c2, Vec3 c3) : c1 (c1), c2 (c2), c3 (c3)
 {
 }
 
+Mat3::Mat3 (const Mat3 &other)
+{
+        this->c1 = other.c1;
+        this->c2 = other.c2;
+        this->c3 = other.c3;
+}
+
+Mat3 &Mat3::operator= (Mat3 other)
+{
+        this->c1 = other.c1;
+        this->c2 = other.c2;
+        this->c3 = other.c3;
+
+        return *this;
+}
+
 Vec3 Mat3::operator* (Vec3 b)
 {
         return this->c1 * b.x + this->c2 * b.y + this->c3 * b.z;

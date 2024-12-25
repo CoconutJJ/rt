@@ -13,5 +13,7 @@ class Quad : public SmoothObject {
         Vec3 get_point (double alpha, double beta);
         Vec3 tangent (Vec3 point) override;
         Vec3 normal (Vec3 point) override;
+        Vec3 sample_point() override;
+        double area() override;
         Vec3 v1, v2;
 };

@@ -1,5 +1,6 @@
 
 #include "kdtree.hpp"
+#include <cassert>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "hitrecord.hpp"
 #include "material.hpp"
@@ -12,8 +13,7 @@
 #include <stdexcept>
 #include <vector>
 
-Mesh::Mesh (const char *obj_filename, Vec3 location, Material *material)
-        : Object (location, material), vertex_kdtree (nullptr)
+Mesh::Mesh (const char *obj_filename, Vec3 location, Material *material) : Object (location, material)
 {
         this->obj_filename = (char *)obj_filename;
         std::string warn, err;
@@ -67,13 +67,14 @@ void Mesh::_load_mesh ()
                 Vec3 vertex = Vec3 (attrib.vertices[3 * i + 0], attrib.vertices[3 * i + 1], attrib.vertices[3 * i + 2]);
                 vertices.push_back (vertex + delta);
         }
-        this->vertex_kdtree = new KDTree (vertices);
+        this->vertex_kdtree = KDTree (vertices);
 
         // Loop over shapes and convert each mesh into a triangle defined by two vectors
         for (size_t s = 0; s < shape.size (); s++) {
                 size_t index_offset = 0;
                 for (size_t f = 0; f < shape[s].mesh.num_face_vertices.size (); f++) {
                         int fv = shape[s].mesh.num_face_vertices[f];
+                        assert (fv == 3);
                         std::vector<Vec3> vertices;
                         std::vector<Vec3> normals;
                         std::vector<Vec3> texcoords;
@@ -111,8 +112,7 @@ void Mesh::_load_mesh ()
                                 actual_normal = -actual_normal;
 
                         // construct triangle: add to list of triangles and verticies to triangle map
-                        Triangle tri =
-                                Triangle (vertices[0], vertices[1], vertices[2], actual_normal, this->material ());
+                        Triangle tri = Triangle (vertices[0], vertices[1], vertices[2], actual_normal, this->material);
 
                         tri.load_texture_coordinates (texcoords[0], texcoords[1], texcoords[2]);
 
@@ -126,15 +126,15 @@ void Mesh::_load_mesh ()
 
 bool Mesh::hit (Ray r, HitRecord &record)
 {
-        std::vector<Vec3> verticies = this->vertex_kdtree->hit_bbox (r);
+        std::vector<Vec3> verticies = this->vertex_kdtree.hit_bbox (r);
 
         // std::cerr << "Vertex Count: " << verticies.size () << std::endl;
 
         HitRecord best_record;
         best_record.lambda = DBL_MAX;
-        // something is wrong with the kdtree
+
         for (Vec3 vertex : verticies) {
-                for (Triangle tri : this->vertex_to_triangles[vertex]) {
+                for (Triangle &tri : this->vertex_to_triangles[vertex]) {
                         HitRecord temp_record;
                         if (tri.hit (r, temp_record) && temp_record.lambda < best_record.lambda) {
                                 best_record = temp_record;

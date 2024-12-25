@@ -16,6 +16,9 @@ class Sphere : public SmoothObject {
         Vec3 tangent (double theta, double phi);
         Vec3 bitangent (double theta, double phi);
         Vec3 spherical_coord (Vec3 point);
+        Vec3 sample_point () override;
+
+        double area () override;
 
     private:
         double argument (double y_opp, double x_adj);

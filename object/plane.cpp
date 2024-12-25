@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "smooth_object.hpp"
 #include "vec3.hpp"
+#include <stdexcept>
 Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
 {
         if (normal.x != 0)
@@ -84,8 +85,17 @@ bool Plane::hit (Ray r, HitRecord &record)
         if (!this->hit_point (r, record.hit_point, record.lambda))
                 return false;
 
-        record.mat = this->mat;
         record.setNormal (r, this->mapped_normal (record.hit_point));
-        record.obj = this;
+        record.object = this;
         return true;
+}
+
+Vec3 Plane::sample_point() {
+
+        throw std::logic_error("not implemented");
+
+}
+
+double Plane::area() {
+        throw std::logic_error("not implemented");
 }

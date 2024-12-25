@@ -5,9 +5,11 @@
 #include "solid_texture.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
+
 #include <cmath>
 
-Dielectric::Dielectric (double refraction_index) : refraction_index (refraction_index)
+Dielectric::Dielectric (double refraction_index, double absorption)
+        : refraction_index (refraction_index), absorption (absorption)
 {
         this->texture = new SolidTexture (Vec3 (1, 1, 1));
 }
@@ -17,7 +19,7 @@ Dielectric::~Dielectric ()
         delete this->texture;
 }
 
-Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf)
+Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
 {
         double mu = record.front_face ? (1 / refraction_index) : refraction_index;
         Vec3 unit_direction = r.direction.unit ();
@@ -25,12 +27,34 @@ Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf)
         double cos_theta = std::fmin (-unit_direction.dot (record.normal), 1.0);
 
         Vec3 direction;
-        if (!r.can_refract (record.normal, mu) || reflectance (cos_theta, mu) > random_double (0, 1)) {
+        double attenuation = 1;
+
+        if (!record.front_face) {
+                double d = (record.lambda * r.direction).length ();
+                attenuation = exp (-absorption * d);
+        }
+
+        double refl = reflectance (cos_theta, mu);
+
+        // direction = unit_direction.refract (record.normal, mu);
+        // brdf = (1 - refl) * Vec3 (1, 1, 1) * attenuation;
+        // ray_prob = 1 - refl;
+
+        if (!r.can_refract (record.normal, mu)) {
+                brdf = Vec3 (1, 1, 1) * refl * attenuation;
+                ray_prob = refl;
+                return unit_direction.reflect (record.normal);
+        }
+
+        if (random_double (0, 1) < refl) {
                 direction = unit_direction.reflect (record.normal);
-                brdf = record.obj->brdf (record.hit_point, r.direction, direction);
+                brdf = Vec3 (1, 1, 1) * refl * attenuation;
+                ray_prob = refl;
+
         } else {
                 direction = unit_direction.refract (record.normal, mu);
-                brdf = Vec3 (1, 1, 1);
+                brdf = (1 - refl) * Vec3 (1, 1, 1) * attenuation;
+                ray_prob = 1 - refl;
         }
 
         return direction;

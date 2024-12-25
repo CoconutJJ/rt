@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "smooth_object.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 #include <cmath>
 
@@ -92,9 +93,8 @@ bool Sphere::hit (Ray r, HitRecord &record)
 
         record.hit_point = r.at (record.lambda);
         record.setNormal (r, this->mapped_normal (record.hit_point));
-        record.mat = this->mat;
         record.uv = this->to_uv (record.hit_point);
-        record.obj = this;
+        record.object = this;
         return true;
 }
 
@@ -124,4 +124,17 @@ Vec3 Sphere::to_uv (Vec3 point)
         double u = theta / (2 * M_PI);
 
         return Vec3 (u, v, 0);
+}
+
+Vec3 Sphere::sample_point ()
+{
+        return this->location +
+               Vec3 (this->radius, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv ();
+}
+
+double Sphere::area() 
+{
+
+        return 4 * M_PI * this->radius * this->radius;
+
 }

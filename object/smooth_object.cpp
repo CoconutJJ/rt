@@ -1,4 +1,5 @@
 #include "smooth_object.hpp"
+#include "hitrecord.hpp"
 #include "mat3.hpp"
 #include "material.hpp"
 #include "object.hpp"
@@ -17,7 +18,7 @@ SmoothObject::SmoothObject (Vec3 location1, Vec3 location2, Material *material)
 SmoothObject::SmoothObject (Vec3 location1, Vec3 location2, Material *material, Texture *normal_map)
         : Object (location1, location2, material)
 {
-        this->mat->normal_map = normal_map;
+        this->material->normal_map = normal_map;
 }
 
 bool SmoothObject::is_light_source ()
@@ -27,13 +28,11 @@ bool SmoothObject::is_light_source ()
 
 Vec3 SmoothObject::mapped_normal (Vec3 point)
 {
-        if (!this->mat)
-                return this->normal(point);
-        
-        if (!this->mat->normal_map)
+
+        if (!this->material->normal_map)
                 return this->normal (point);
 
-        return this->mat->normal (this->tbn (point), this->normal (point), this->to_uv (point));
+        return this->material->normal (this->tbn (point), this->normal (point), this->to_uv (point));
 }
 /**
         Tangent, BiTangent & Normal Matrix:
@@ -55,12 +54,12 @@ Mat3 SmoothObject::tbn (Vec3 point)
 
         Used in path tracer for BRDF unit hemisphere coordinate system calculations.
  */
-Mat3 SmoothObject::tnb (Vec3 point)
+Mat3 SmoothObject::tnb (HitRecord &record)
 {
-        Vec3 tangent = this->tangent (point);
-        Vec3 normal = this->normal (point);
+        Vec3 tangent = this->tangent (record.hit_point);
+  
 
-        Mat3 tnb (tangent, normal, normal.cross (tangent));
+        Mat3 tnb (tangent, record.normal, record.normal.cross (tangent));
 
         return tnb;
 }
@@ -70,10 +69,3 @@ Vec3 SmoothObject::tbn_transform (Vec3 point, Vec3 tangent_v)
         return this->tbn (point) * tangent_v;
 }
 
-Vec3 SmoothObject::brdf (Vec3 point, Vec3 in_direction, Vec3 out_direction)
-{
-        if (!this->mat->brdf)
-                throw std::logic_error ("No BRDF specified!");
-
-        return this->mat->brdf->compute (this->tnb (point), in_direction, out_direction);
-}

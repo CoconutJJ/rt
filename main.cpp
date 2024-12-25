@@ -4,6 +4,7 @@
 #include "dielectric.hpp"
 #include "lambertian.hpp"
 #include "mesh.hpp"
+#include "metal.hpp"
 #include "phong.hpp"
 #include "plane.hpp"
 #include "point_light.hpp"
@@ -12,7 +13,6 @@
 #include "solid_texture.hpp"
 #include "sphere.hpp"
 #include "termcolor.hpp"
-#include "triangle.hpp"
 #include "usage.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
@@ -172,30 +172,40 @@ int main (int argc, char **argv)
 
         World world;
 
-        BRDF brdf ("brdf/white-diffuse-bball.binary");
-        Dielectric glass (1.5);
-        glass.brdf = &brdf;
-        Lambertian lamb (Vec3 (1, 1, 1));
-        lamb.brdf = &brdf;
-        lamb.emission (Vec3 (500, 500, 500));
+        Dielectric glass (2.5, 0);
 
-        Lambertian lamb2 (Vec3 (0.8, 0.2, 0.2));
-        lamb2.brdf = &brdf;
+        Metal metal (Vec3 (0.5, 0.5, 0.5), 0.05);
+        CheckerboardTexture checkers(Vec3(0,0,0), Vec3(1,1,1));
+        Lambertian red_diffuse (0.5, Vec3 (0.8, 0.02, 0.02));
 
-        Quad light_panel (Vec3 (-1, 0, -1), Vec3 (-3, 0, 0), Vec3 (0, 0, 3), &lamb);
-        Sphere sp (Vec3 (-1, -1.5, -1), 0.5, &glass);
+        Lambertian green_diffuse (0.5, Vec3 (0.02, 0.8, 0.02));
 
-        CheckerboardTexture checkerboard (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
-        Lambertian background (&checkerboard);
-        background.brdf = &brdf;
+        Lambertian blue_diffuse (0.5, Vec3 (0.02, 0.02, 0.8));
 
-        Plane p (Vec3 (0, -2, 0), Vec3 (0, 1, 0), &background);
+        Lambertian white_diffuse (0.5, Vec3 (1, 1, 1));
 
-        Mesh m ("assets/sphere.obj", Vec3 (-1, -1.5, -1), &glass);
-        Triangle t(Vec3 (-1, -1, -1), Vec3(-1,0,0), Vec3(0,-0.5,0), &background);
-        world.add (&m);
+        Lambertian checkers_diffuse(0.5, &checkers);
+
+        Lambertian light (1, Vec3 (1, 1, 1));
+        light.emission (Vec3 (1, 1, 1));
+
+        Quad left_wall (Vec3 (-1, 0, 0), Vec3 (0, 0, -2), Vec3 (0, 2, 0), &red_diffuse);
+        Quad right_wall (Vec3 (1, 2, 0), Vec3 (0, 0, -2), Vec3 (0, -2, 0), &green_diffuse);
+        Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &checkers_diffuse);
+        Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
+        Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &blue_diffuse);
+        Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light);
+        // Quad front_wall (Vec3 (1, 2, 0), Vec3 (0, -4, 0), Vec3 (-4, 0, 0), &white_diffuse);
+
+        Sphere sp (Vec3 (0, 0.9, -0.5), 0.5, &glass);
+
+        world.add (&left_wall);
+        world.add (&right_wall);
+        world.add (&back_wall);
+        world.add (&ceiling);
+        world.add (&floor);
         world.add (&light_panel);
-        world.add (&p);
+        world.add (&sp);
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();

@@ -19,8 +19,33 @@ Triangle::Triangle (Vec3 p1, Vec3 p2, Vec3 p3, Vec3 normal, Material *material) 
         this->v = p3 - p1;
         this->n = normal;
 }
-Triangle::~Triangle ()
+
+Triangle::Triangle (const Triangle &triangle) : SmoothObject (triangle)
 {
+        this->u = triangle.u;
+        this->v = triangle.v;
+        this->n = triangle.n;
+
+        this->t1 = triangle.t1;
+        this->t2 = triangle.t2;
+        this->t3 = triangle.t3;
+
+        this->T = triangle.T;
+}
+
+Triangle &Triangle::operator= (Triangle &triangle)
+{
+        this->u = triangle.u;
+        this->v = triangle.v;
+        this->n = triangle.n;
+
+        this->t1 = triangle.t1;
+        this->t2 = triangle.t2;
+        this->t3 = triangle.t3;
+
+        this->T = triangle.T;
+
+        return *this;
 }
 
 void Triangle::center (Vec3 point)
@@ -59,9 +84,8 @@ bool Triangle::hit (Ray r, HitRecord &record)
         if (!this->inside (record.hit_point))
                 return false;
 
-        record.mat = this->mat;
         record.setNormal (r, this->mapped_normal (record.hit_point));
-        record.obj = this;
+        record.object = this;
 
         return true;
 }
@@ -88,4 +112,23 @@ Vec3 Triangle::tangent (Vec3 point)
 Vec3 Triangle::normal (Vec3 point)
 {
         return this->n;
+}
+
+Vec3 Triangle::sample_point ()
+{
+        double alpha = random_double (0, 1), beta = random_double (0, 1);
+
+        Vec3 point = alpha * this->u + beta * this->v;
+
+        if (this->inside (this->location + point))
+                return point;
+
+        Vec3 midpoint = (u - v) / 2;
+
+        return this->location + point + 2 * (midpoint - point);
+}
+
+double Triangle::area ()
+{
+        return this->u.cross (this->v).length ();
 }

@@ -31,7 +31,7 @@
 class Mesh : public Object {
     public:
         Mesh (const char *filename, Vec3 location, Material *material);
-        KDTree *vertex_kdtree;
+        KDTree vertex_kdtree;
 
         std::vector<Triangle> triangles;
         std::map<Vec3, std::vector<Triangle> > vertex_to_triangles;
@@ -40,7 +40,7 @@ class Mesh : public Object {
         std::vector<tinyobj::material_t> mats;
 
         char *obj_filename;
-        bool is_light_source() override;
+        bool is_light_source () override;
         bool hit (Ray r, HitRecord &record) override;
         void vertex_average (Vec3 center);
         void center (Vec3 center);

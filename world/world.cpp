@@ -8,6 +8,7 @@
 #include "smooth_object.hpp"
 #include "vec3.hpp"
 #include <cfloat>
+#include <cstdlib>
 #include <utility>
 #include <vector>
 
@@ -18,6 +19,14 @@ World::World ()
 void World::add (Object *obj)
 {
         this->objects.push_back (obj);
+
+        SmoothObject *smooth_obj = dynamic_cast<SmoothObject *> (obj);
+
+        if (!smooth_obj)
+                return;
+
+        if (smooth_obj->material->is_emissive ())
+                this->emissives.push_back (smooth_obj);
 }
 
 void World::add_light (Light *light)
@@ -85,6 +94,11 @@ bool World::has_path (Vec3 a, Vec3 b)
         return rec.lambda > (b - a).length () - 0.001;
 }
 
+SmoothObject *World::random_light ()
+{
+        return this->emissives[rand () % this->emissives.size ()];
+}
+
 Vec3 World::photon_map_color (Vec3 point)
 {
         Vec3 color (0, 0, 0);
@@ -133,7 +147,7 @@ void World::photon_map_forward_pass ()
                                         continue;
                                 }
 
-                                Material::PhongParams params = record.mat->phong (curr_ray, record);
+                                Material::PhongParams params = record.object->material->phong (curr_ray, record);
 
                                 if (params.gamma == 1.0) {
                                         if (depth == max_depth)

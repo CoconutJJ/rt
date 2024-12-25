@@ -1521,9 +1521,9 @@ namespace Catch {
 
 
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
-#include <algorithm>
 
 namespace Catch {
 
@@ -1774,9 +1774,9 @@ namespace Catch {
 
 
 #include <algorithm>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <ostream>
 
 namespace Catch {
 
@@ -3702,10 +3702,10 @@ namespace Catch {
 #if defined(CATCH_PLATFORM_MAC) || defined(CATCH_PLATFORM_IPHONE)
 
 #  include <cassert>
-#  include <sys/types.h>
-#  include <unistd.h>
 #  include <cstddef>
 #  include <ostream>
+#  include <sys/types.h>
+#  include <unistd.h>
 
 #ifdef __apple_build_version__
     // These headers will only compile with AppleClang (XCode)
@@ -5596,8 +5596,8 @@ namespace Catch {
 
 
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 
 namespace Catch {
 
@@ -6448,9 +6448,9 @@ namespace Catch {
 
 
 
-#include <ostream>
-#include <cstring>
 #include <cctype>
+#include <cstring>
+#include <ostream>
 #include <vector>
 
 namespace Catch {
@@ -6557,9 +6557,9 @@ namespace Catch {
 
 
 #include <algorithm>
-#include <ostream>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
+#include <ostream>
 
 namespace Catch {
     StringRef::StringRef( char const* rawChars ) noexcept
@@ -8206,11 +8206,11 @@ ExceptionMessageMatcher Message(std::string const& message) {
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 #include <cstdint>
-#include <sstream>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
+#include <sstream>
 
 
 namespace Catch {
@@ -9749,8 +9749,8 @@ namespace Catch {
 #include <algorithm>
 #include <cfloat>
 #include <cstdio>
-#include <ostream>
 #include <iomanip>
+#include <ostream>
 
 namespace Catch {
 
@@ -10434,9 +10434,9 @@ namespace Catch {
 
 
 
+#include <algorithm>
 #include <cassert>
 #include <ctime>
-#include <algorithm>
 #include <iomanip>
 
 namespace Catch {

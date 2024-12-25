@@ -21,6 +21,7 @@
  */
 
 #pragma once
+#include "hitrecord.hpp"
 #include "material.hpp"
 #include "object.hpp"
 #include "texture.hpp"
@@ -36,10 +37,11 @@ class SmoothObject : public Object {
         virtual Vec3 tangent (Vec3 point) = 0;
         virtual Vec3 normal (Vec3 point) = 0;
         virtual Vec3 to_uv (Vec3 point) = 0;
+        virtual Vec3 sample_point() = 0;
+        virtual double area() = 0;
 
         Vec3 mapped_normal (Vec3 point);
         Mat3 tbn (Vec3 point);
-        Mat3 tnb (Vec3 point);
+        Mat3 tnb (HitRecord &record);
         Vec3 tbn_transform (Vec3 point, Vec3 tangent_v);
-        Vec3 brdf (Vec3 point, Vec3 in_direction, Vec3 out_direction);
 };

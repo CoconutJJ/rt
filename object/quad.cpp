@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "smooth_object.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 
 Quad::Quad (Vec3 location, Vec3 v1, Vec3 v2, Material *mat) : SmoothObject (location, mat)
@@ -48,10 +49,9 @@ bool Quad::hit (Ray r, HitRecord &record)
 
         record.hit_point = hit_point;
         record.lambda = lambda;
-        record.mat = this->mat;
         record.uv = uv;
         record.setNormal (r, this->mapped_normal (hit_point));
-        record.obj = this;
+        record.object = this;
         return true;
 }
 
@@ -73,4 +73,14 @@ Vec3 Quad::to_uv (Vec3 point)
 Vec3 Quad::get_point (double alpha, double beta)
 {
         return this->location + this->v1 * alpha + this->v2 * beta;
+}
+
+Vec3 Quad::sample_point ()
+{
+        return this->get_point (random_double (0, 1), random_double (0, 1));
+}
+
+double Quad::area()
+{
+        return this->v1.cross (this->v2).length();
 }

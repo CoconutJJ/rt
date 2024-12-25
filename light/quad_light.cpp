@@ -23,7 +23,7 @@ Vec3 QuadLight::diffuse_intensity (Vec3 point)
 {
         Vec3 uv = this->quad->to_uv (point);
 
-        return this->quad->material ()->texture->read_texture_uv (uv, point);
+        return this->quad->material->texture->read_texture_uv (uv, point);
 }
 
 Vec3 QuadLight::specular_intensity (Vec3 point)

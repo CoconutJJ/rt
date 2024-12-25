@@ -8,7 +8,7 @@ Material::Material ()
 {
 }
 
-Material::Material (Texture *texture, Texture *normal_map) : texture (texture), normal_map (normal_map)
+Material::Material (Texture *texture, Texture *normal_map) : texture (texture), normal_map (normal_map), emission_value(0,0,0)
 {
 }
 
@@ -34,7 +34,7 @@ void Material::emission (Vec3 color)
         this->emission_value = color;
 }
 
-Vec3 Material::emission (Ray r, HitRecord &record)
+Vec3 Material::emission ()
 {
         return this->emission_value;
 }

@@ -46,27 +46,25 @@ bool hit_box (Vec3 point,
               double &beta,
               double &lambda)
 {
+        Vec3 n = u.cross (v);
 
-        Vec3 n = u.cross(v);
-        
-        if (std::abs(n.dot(r.direction)) < 1e-8)
+        if (std::abs (n.dot (r.direction)) < 1e-8)
                 return false;
 
-        double _lambda = n.dot(point - r.origin) / n.dot(r.direction);
-        
+        double _lambda = n.dot (point - r.origin) / n.dot (r.direction);
+
         if (_lambda < 0)
                 return false;
 
-        Vec3 hit_point = r.at(_lambda);
+        Vec3 hit_point = r.at (_lambda);
 
-        
-        double _alpha = v.cross(hit_point - point).dot(n) / v.cross(u).dot(n);
-        double _beta = u.cross(hit_point - point).dot(n) / u.cross(v).dot(n);
+        double _alpha = v.cross (hit_point - point).dot (n) / v.cross (u).dot (n);
+        double _beta = u.cross (hit_point - point).dot (n) / u.cross (v).dot (n);
 
         lambda = _lambda;
         alpha = _alpha;
         beta = _beta;
-        
+
         // std::cerr << "AB:" << n << point << r.origin << std::endl;
 
         return (0 <= _alpha && _alpha <= u_length) && (0 <= _beta && _beta <= v_length);
