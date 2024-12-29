@@ -2,8 +2,6 @@
 
 #include "material.hpp"
 class Glossy : Material {
-
     public:
-        Glossy();
-
+        Glossy ();
 };

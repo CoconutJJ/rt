@@ -80,7 +80,7 @@ Vec3 Quad::sample_point ()
         return this->get_point (random_double (0, 1), random_double (0, 1));
 }
 
-double Quad::area()
+double Quad::area ()
 {
-        return this->v1.cross (this->v2).length();
+        return this->v1.cross (this->v2).length ();
 }

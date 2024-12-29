@@ -1,6 +1,7 @@
 
 #include "kdtree.hpp"
 #include <cassert>
+#include <ostream>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "hitrecord.hpp"
 #include "material.hpp"
@@ -85,17 +86,21 @@ void Mesh::_load_mesh ()
                                                     attrib.vertices[3 * idx.vertex_index + 2]);
                                 vertices.push_back (vertex + delta);
 
-                                Vec3 normal = Vec3 (attrib.normals[3 * idx.normal_index + 0],
-                                                    attrib.normals[3 * idx.normal_index + 1],
-                                                    attrib.normals[3 * idx.normal_index + 2]);
+                                if (idx.normal_index != -1) {
+                                        Vec3 normal = Vec3 (attrib.normals[3 * idx.normal_index + 0],
+                                                            attrib.normals[3 * idx.normal_index + 1],
+                                                            attrib.normals[3 * idx.normal_index + 2]);
 
-                                normals.push_back (normal);
+                                        normals.push_back (normal);
+                                }
 
-                                Vec3 texture = Vec3 (attrib.texcoords[2 * idx.texcoord_index + 0],
-                                                     attrib.texcoords[2 * idx.texcoord_index + 1],
-                                                     0);
+                                if (idx.texcoord_index != -1) {
+                                        Vec3 texture = Vec3 (attrib.texcoords[2 * idx.texcoord_index + 0],
+                                                             attrib.texcoords[2 * idx.texcoord_index + 1],
+                                                             0);
 
-                                texcoords.push_back (texture);
+                                        texcoords.push_back (texture);
+                                }
                         }
                         index_offset += fv;
 
@@ -130,15 +135,22 @@ bool Mesh::hit (Ray r, HitRecord &record)
 
         // std::cerr << "Vertex Count: " << verticies.size () << std::endl;
 
-        HitRecord best_record;
-        best_record.lambda = DBL_MAX;
+        std::set<Triangle *> triangles;
 
         for (Vec3 vertex : verticies) {
                 for (Triangle &tri : this->vertex_to_triangles[vertex]) {
-                        HitRecord temp_record;
-                        if (tri.hit (r, temp_record) && temp_record.lambda < best_record.lambda) {
-                                best_record = temp_record;
-                        }
+                        triangles.emplace (&tri);
+                }
+        }
+
+        // std::cerr << double(verticies.size()) / (attrib.vertices.size() / 3) << std::endl;
+
+        HitRecord best_record;
+        best_record.lambda = DBL_MAX;
+        for (Triangle *tri : triangles) {
+                HitRecord temp_record;
+                if (tri->hit (r, temp_record) && temp_record.lambda < best_record.lambda) {
+                        best_record = temp_record;
                 }
         }
 

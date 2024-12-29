@@ -42,8 +42,11 @@ ARGUMENTS:
 -t | --defocus_angle        Defocus blur lens radius (default: 0.0 - no blur),
 -h | --help                 Show this help message
 -n | --nthreads             Multithreading (default: OS suggested value)
--a | --arealight_samples    Number of samples for area light
+-a | --arealight_samples    Number of samples for area light (default: 10)
 -p | --use_path_tracer      Use path tracer instead of default ray tracer
+-d | --max_depth            Max ray bounce depth (default: 5)
+-s | --samples_per_pixel    Number of rays cast for each pixel (default: 1000)
+-l | --use_light_sampling   Use explicit light sampling
 ```
 
 In order to test the normal maps, I also created a tool that converts height 

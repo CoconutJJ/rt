@@ -37,8 +37,8 @@ class SmoothObject : public Object {
         virtual Vec3 tangent (Vec3 point) = 0;
         virtual Vec3 normal (Vec3 point) = 0;
         virtual Vec3 to_uv (Vec3 point) = 0;
-        virtual Vec3 sample_point() = 0;
-        virtual double area() = 0;
+        virtual Vec3 sample_point () = 0;
+        virtual double area () = 0;
 
         Vec3 mapped_normal (Vec3 point);
         Mat3 tbn (Vec3 point);

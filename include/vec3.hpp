@@ -6,8 +6,8 @@ class Vec3 {
         double y;
         double z;
         Vec3 ();
-        Vec3 (const Vec3& other);
-        Vec3& operator=(Vec3 other);
+        Vec3 (const Vec3 &other);
+        Vec3 &operator= (Vec3 other);
         Vec3 (double x, double y, double z);
         Vec3 operator+ (Vec3 a);
         Vec3 operator+ (double d);
@@ -36,7 +36,7 @@ class Vec3 {
         Vec3 sph ();
         Vec3 sph_inv ();
         bool near_zero ();
-        static Vec3 random_hemisphere();
+        static Vec3 random_hemisphere ();
         static Vec3 random ();
         static Vec3 zero ();
         static Vec3 inf ();

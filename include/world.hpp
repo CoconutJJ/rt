@@ -20,7 +20,7 @@ class World {
         World ();
         void add (Object *obj);
         bool hit (Ray r, HitRecord &record);
-        SmoothObject * random_light();
+        SmoothObject *random_light ();
         bool has_path (Ray r, Object *obj);
         bool has_path (Vec3 a, Vec3 b);
         void add_light (Light *light);

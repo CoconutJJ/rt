@@ -180,8 +180,7 @@ Vec3 Vec3::refract (Vec3 n, double mu)
 
         n = -n.unit ();
 
-        return mu * l + (n * sqrt(1 - mu * mu * (1 - (n.dot(l) * n.dot(l))))) - (mu * (n.dot(l)) * n);
-
+        return mu * l + (n * sqrt (1 - mu * mu * (1 - (n.dot (l) * n.dot (l))))) - (mu * (n.dot (l)) * n);
 }
 
 Vec3 Vec3::zero ()
@@ -198,7 +197,7 @@ Vec3 Vec3::rotate (Vec3 axis, double angle)
 
 Vec3 Vec3::random_hemisphere ()
 {
-        return Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv();
+        return Vec3 (1, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv ();
 }
 
 double Vec3::argument (double y_opp, double x_adj)

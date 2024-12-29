@@ -37,7 +37,7 @@ Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : SmoothO
         |  /
         | /
         |/_______ +x
- */
+*/
 Vec3 Sphere::tangent (double theta, double phi)
 {
         return Vec3 (-this->radius * std::sin (phi) * std::sin (theta),
@@ -132,9 +132,7 @@ Vec3 Sphere::sample_point ()
                Vec3 (this->radius, random_double (0, 2 * M_PI), random_double (0, M_PI / 2)).sph_inv ();
 }
 
-double Sphere::area() 
+double Sphere::area ()
 {
-
         return 4 * M_PI * this->radius * this->radius;
-
 }

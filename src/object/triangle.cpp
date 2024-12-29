@@ -73,17 +73,19 @@ bool Triangle::inside (Vec3 point)
 
 bool Triangle::hit (Ray r, HitRecord &record)
 {
-        double alpha, beta;
+        double alpha, beta, lambda;
 
-        if (!hit_box (this->location, this->u, this->v, 1, 1, r, alpha, beta, record.lambda))
+        if (!hit_box (this->location, this->u, this->v, 1, 1, r, alpha, beta, lambda))
                 return false;
 
-        record.hit_point = r.at (record.lambda);
+        Vec3 hit_point = r.at (lambda);
+
+        if (!this->inside (hit_point))
+                return false;
+        
+        record.lambda = lambda;
+        record.hit_point = hit_point;
         record.uv = this->to_uv (record.hit_point);
-
-        if (!this->inside (record.hit_point))
-                return false;
-
         record.setNormal (r, this->mapped_normal (record.hit_point));
         record.object = this;
 

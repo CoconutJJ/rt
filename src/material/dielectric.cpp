@@ -36,19 +36,17 @@ Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob
 
         double refl = reflectance (cos_theta, mu);
 
-        // direction = unit_direction.refract (record.normal, mu);
-        // brdf = (1 - refl) * Vec3 (1, 1, 1) * attenuation;
-        // ray_prob = 1 - refl;
-
         if (!r.can_refract (record.normal, mu)) {
-                brdf = Vec3 (1, 1, 1) * refl * attenuation;
+                refl = 1;
+
+                brdf = Vec3 (1, 1, 1) * refl * cos_theta * attenuation;
                 ray_prob = refl;
                 return unit_direction.reflect (record.normal);
         }
 
         if (random_double (0, 1) < refl) {
                 direction = unit_direction.reflect (record.normal);
-                brdf = Vec3 (1, 1, 1) * refl * attenuation;
+                brdf = Vec3 (1, 1, 1) * cos_theta * refl * attenuation;
                 ray_prob = refl;
 
         } else {

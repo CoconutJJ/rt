@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include "hitrecord.hpp"
+#include "lambertian.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "object.hpp"
@@ -35,12 +36,14 @@ void Camera::initialize (struct RendererSettings settings)
         this->vfov = settings.vfov;
         this->use_path_tracer = settings.use_path_tracer;
         this->arealight_samples = settings.arealight_samples;
+        this->max_depth = settings.max_depth;
+        this->use_light_sampling = settings.use_light_sampling;
+        this->use_scene_sig = settings.use_scene_sig;
 
         this->lookat = Vec3 (0, 1, -1);
-        this->center = Vec3 (0, 1.3, 2); // (1, 1, 4)
+        this->center = Vec3 (0, 1, 1); // (1, 1, 4)
         this->focus_dist = 1;
 
-        this->max_depth = 5;
         this->image_height = int (this->image_width / this->aspect_ratio);
         this->viewport_height = 2 * this->focus_dist * std::tan (deg2rad (this->vfov / 2));
         this->viewport_width = this->viewport_height * (double (this->image_width) / this->image_height);
@@ -104,8 +107,7 @@ Vec3 Camera::sample_light_rays (World *world,
 
         /**
                 We use the Blinn-Phong Lighting Model for the ray tracer.
-         */
-
+        */
         for (int i = 0; i < light_num_samples; i++) {
                 Vec3 point = light->sample_point ();
 
@@ -189,7 +191,13 @@ void Camera::write_color (Vec3 color)
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
 {
+        if (!dynamic_cast<Lambertian*>(record.object->material))
+                return Vec3(0,0,0);
+
         SmoothObject *light = world->random_light ();
+
+        if (!light)
+                return Vec3::zero ();
 
         Vec3 light_point = light->sample_point ();
 
@@ -235,22 +243,23 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
 
                 starting_ray = Ray (record.hit_point, scatter_dir);
 
-                SmoothObject *light;
+                if (this->use_light_sampling) {
+                        SmoothObject *light;
 
-                Vec3 light_sample = this->sample_light (world, record, light);
+                        Vec3 light_sample = this->sample_light (world, record, light);
 
-                if (light_sample != Vec3::zero ()) {
-                        HitRecord next_record;
+                        if (light_sample != Vec3::zero ()) {
+                                HitRecord next_record;
 
-                        if (world->hit (starting_ray, next_record)) {
-                                if (next_record.object != light) {
+                                if (world->hit (starting_ray, next_record)) {
+                                        if (next_record.object != light) {
+                                                radiance += light_sample;
+                                        }
+                                } else {
                                         radiance += light_sample;
                                 }
-                        } else {
-                                radiance += light_sample;
                         }
                 }
-
                 radiances.emplace_back (radiance);
 
                 if (record.object->material->is_emissive ())
@@ -274,31 +283,13 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
         return total_radiance;
 }
 
-Vec3 Camera::path_color (Ray r, World *world, int depth)
+Vec3 Camera::scene_signature_color (Ray starting_ray, World *world)
 {
-        if (depth == 0)
-                return Vec3 (0, 0, 0);
-
         HitRecord record;
-
-        if (!world->hit (r, record))
+        if (!world->hit (starting_ray, record))
                 return Vec3 (0, 0, 0);
 
-        Vec3 in_direction = r.direction;
-
-        Vec3 brdf;
-        double ray_prob = 1;
-        Vec3 direction = record.object->material->scatter (r, record, brdf, ray_prob);
-        Ray scatter_ray (record.hit_point + direction.unit() * 0.001, direction);
-
-        size_t light_source_idx = rand () % world->emissives.size ();
-
-        Object *light_source = world->emissives[light_source_idx];
-
-        Vec3 scatter_color = this->path_color (scatter_ray, world, depth - 1);
-
-        return record.object->material->emission () + scatter_color * brdf * record.normal.dot (-in_direction.unit ()) *
-                                                              record.object->material->color (record) / ray_prob;
+        return (record.normal.unit () + Vec3 (1, 1, 1)) / 2;
 }
 
 void Camera::set_output_file (const char *filename)
@@ -313,6 +304,25 @@ void Camera::set_output_file (const char *filename)
                      << "\n";
 }
 
+Vec3 Camera::sample_pixel (World *world, int i, int j)
+{
+        Vec3 pixel_color (0, 0, 0);
+        for (int sample = 0; sample < this->samples_per_pixel; sample++) {
+                Ray r = this->ray (i + random_double (-0.5, 0.5), j + random_double (-0.5, 0.5));
+
+                if (this->use_path_tracer)
+                        pixel_color += this->single_path_color (r, world, this->max_depth);
+                else if (this->use_scene_sig)
+                        pixel_color += this->scene_signature_color (r, world);
+                else
+                        pixel_color += this->ray_color (r, world, this->max_depth);
+        }
+
+        pixel_color /= double (this->samples_per_pixel);
+
+        return pixel_color;
+}
+
 void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
 {
         std::ofstream *file_stream = new std::ofstream (std::string (filename));
@@ -322,6 +332,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                      << this->image_width << ' ' << this->image_height << "\n"
                      << "255"
                      << "\n";
+
         std::mutex pixel_lock;
         std::counting_semaphore<> sem (max_threads);
         std::counting_semaphore<> progress (0);
@@ -332,17 +343,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                 threads.push_back (std::thread ([&, j] {
                         sem.acquire ();
                         for (int i = 0; i < this->image_width; i++) {
-                                Vec3 pixel_color (0, 0, 0);
-                                for (int sample = 0; sample < this->samples_per_pixel; sample++) {
-                                        Ray r = this->ray (i + random_double (-0.5, 0.5),
-                                                           j + random_double (-0.5, 0.5));
-
-                                        pixel_color += this->use_path_tracer ?
-                                                               this->single_path_color (r, world, this->max_depth) :
-                                                               this->ray_color (r, world, this->max_depth);
-                                }
-
-                                pixel_color /= double (this->samples_per_pixel);
+                                Vec3 pixel_color = this->sample_pixel (world, i, j);
 
                                 pixel_lock.lock ();
                                 pixels[i + j * image_width] = pixel_color;
@@ -390,14 +391,7 @@ void Camera::render (World *world, const char *filename)
                 bar.update ();
 
                 for (int i = 0; i < this->image_width; i++) {
-                        Vec3 pixel_color (0, 0, 0);
-                        for (int sample = 0; sample < this->samples_per_pixel; sample++) {
-                                Ray r = this->ray (i + random_double (-0.5, 0.5), j + random_double (-0.5, 0.5));
-                                pixel_color += this->use_path_tracer ? this->path_color (r, world, this->max_depth) :
-                                                                       this->ray_color (r, world, this->max_depth);
-                        }
-                        pixel_color /= double (this->samples_per_pixel);
-                        this->write_color (pixel_color);
+                        this->write_color (this->sample_pixel (world, i, j));
                 }
         }
 }

@@ -27,26 +27,26 @@ KDTree::~KDTree ()
         this->_delete_kdtree (this->root);
 }
 
-KDTree::KDTree(const KDTree& kdtree) {
-
+KDTree::KDTree (const KDTree &kdtree)
+{
         if (this->root)
-                this->_delete_kdtree(this->root);
+                this->_delete_kdtree (this->root);
 
-        this->root = this->_copy_tree(kdtree.root);
+        this->root = this->_copy_tree (kdtree.root);
 }
 
-KDTree& KDTree::operator=(const KDTree &other) {
-
+KDTree &KDTree::operator= (const KDTree &other)
+{
         if (this->root)
-                this->_delete_kdtree(this->root);
+                this->_delete_kdtree (this->root);
 
-        this->root = this->_copy_tree(other.root);
+        this->root = this->_copy_tree (other.root);
 
         return *this;
 }
 
-struct KDTree::KDTreeNode *KDTree::_copy_tree(struct KDTree::KDTreeNode *root) {
-
+struct KDTree::KDTreeNode *KDTree::_copy_tree (struct KDTree::KDTreeNode *root)
+{
         if (!root)
                 return nullptr;
 
@@ -54,8 +54,8 @@ struct KDTree::KDTreeNode *KDTree::_copy_tree(struct KDTree::KDTreeNode *root) {
 
         *new_root = *root;
 
-        new_root->left = this->_copy_tree(root->left);
-        new_root->right = this->_copy_tree(root->right);
+        new_root->left = this->_copy_tree (root->left);
+        new_root->right = this->_copy_tree (root->right);
 
         return new_root;
 }
@@ -198,7 +198,7 @@ Vec3 KDTree::_nn (Vec3 node, Vec3 best, struct KDTreeNode *root, int depth)
 
         double root_plane_perp_dist = std::abs (root->value[dim_index] - node[dim_index]);
 
-        if (root_plane_perp_dist * root_plane_perp_dist < (node - best).length_squared ())
+        if (root_plane_perp_dist * root_plane_perp_dist <= (node - best).length_squared ())
                 best = this->_closest_to (node, this->_nn (node, best, sibling, depth + 1), best);
 
         return best;
@@ -247,19 +247,8 @@ bool KDTree::BoundingBox::hit (Ray r)
 
                         double u_length = this->max[dim_i] - this->min[dim_i];
 
-                        if (this->max[dim_i] == DBL_MAX)
-                                u_length = DBL_MAX;
-
-                        else if (this->min[dim_i] == -DBL_MAX)
-                                u_length = DBL_MAX;
-
                         double v_length = this->max[dim_j] - this->min[dim_j];
 
-                        if (this->max[dim_j] == DBL_MAX)
-                                v_length = DBL_MAX;
-
-                        else if (this->min[dim_j] == -DBL_MAX)
-                                v_length = DBL_MAX;
 
                         // if (u_length != DBL_MAX || v_length != DBL_MAX)
                         //         std::cerr << u_length << ", " << v_length << std::endl;

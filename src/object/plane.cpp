@@ -90,12 +90,12 @@ bool Plane::hit (Ray r, HitRecord &record)
         return true;
 }
 
-Vec3 Plane::sample_point() {
-
-        throw std::logic_error("not implemented");
-
+Vec3 Plane::sample_point ()
+{
+        throw std::logic_error ("not implemented");
 }
 
-double Plane::area() {
-        throw std::logic_error("not implemented");
+double Plane::area ()
+{
+        throw std::logic_error ("not implemented");
 }

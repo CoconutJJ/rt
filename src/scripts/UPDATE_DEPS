@@ -1,0 +1,5 @@
+#!/bin/bash
+
+wget -P include https://github.com/catchorg/Catch2/releases/latest/download/catch_amalgamated.hpp
+wget -P include https://github.com/catchorg/Catch2/releases/latest/download/catch_amalgamated.cpp
+wget -P include https://github.com/nlohmann/json/releases/latest/download/json.hpp

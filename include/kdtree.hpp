@@ -29,8 +29,8 @@ class KDTree {
 
         KDTree ();
         ~KDTree ();
-        KDTree (const KDTree& kdtree);
-        KDTree& operator=(const KDTree &other);
+        KDTree (const KDTree &kdtree);
+        KDTree &operator= (const KDTree &other);
         KDTree (std::vector<Vec3> points);
 
         friend class KDTree;
@@ -49,5 +49,5 @@ class KDTree {
         Vec3 _nn (Vec3 node, Vec3 best, struct KDTreeNode *root, int depth);
         struct KDTreeNode *_insert_depth (struct KDTreeNode *root, Vec3 node, BoundingBox box, int depth);
         struct KDTreeNode *_construct_from_list (std::vector<Vec3> points, BoundingBox box, int depth);
-        struct KDTreeNode *_copy_tree(struct KDTreeNode *root);
+        struct KDTreeNode *_copy_tree (struct KDTreeNode *root);
 };

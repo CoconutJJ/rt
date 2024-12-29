@@ -1,0 +1,34 @@
+{
+    "arguments": {
+
+
+
+    },
+    "camera": {
+        "position": [],
+        "lookat": []
+    },
+    "textures": [
+        {
+            "name": "earth",
+            "file": ""
+        }
+    ],
+    "materials": [
+        {
+            "name": "wood",
+            "type": "lambertian",
+            "reflectivity": 0.4
+        }
+    ],
+    "objects": [
+        {
+            "object": "sphere",
+            "radius": 0.5,
+            "x": 0,
+            "y": 0.5,
+            "z": 0,
+            "material": "wood"
+        }
+    ]
+}

@@ -96,6 +96,10 @@ bool World::has_path (Vec3 a, Vec3 b)
 
 SmoothObject *World::random_light ()
 {
+
+        if (this->emissives.size() == 0)
+                return nullptr;
+
         return this->emissives[rand () % this->emissives.size ()];
 }
 

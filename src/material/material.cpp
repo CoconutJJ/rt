@@ -8,7 +8,8 @@ Material::Material ()
 {
 }
 
-Material::Material (Texture *texture, Texture *normal_map) : texture (texture), normal_map (normal_map), emission_value(0,0,0)
+Material::Material (Texture *texture, Texture *normal_map)
+        : texture (texture), normal_map (normal_map), emission_value (0, 0, 0)
 {
 }
 

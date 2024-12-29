@@ -9,6 +9,7 @@ class Lambertian : public Material {
         Lambertian (double reflectivity, Vec3 solid_color);
         Lambertian (double reflectivity, Texture *texture);
         Vec3 scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob) override;
+
     private:
         Vec3 albedo;
 };

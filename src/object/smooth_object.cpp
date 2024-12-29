@@ -28,7 +28,6 @@ bool SmoothObject::is_light_source ()
 
 Vec3 SmoothObject::mapped_normal (Vec3 point)
 {
-
         if (!this->material->normal_map)
                 return this->normal (point);
 
@@ -57,7 +56,6 @@ Mat3 SmoothObject::tbn (Vec3 point)
 Mat3 SmoothObject::tnb (HitRecord &record)
 {
         Vec3 tangent = this->tangent (record.hit_point);
-  
 
         Mat3 tnb (tangent, record.normal, record.normal.cross (tangent));
 
@@ -68,4 +66,3 @@ Vec3 SmoothObject::tbn_transform (Vec3 point, Vec3 tangent_v)
 {
         return this->tbn (point) * tangent_v;
 }
-

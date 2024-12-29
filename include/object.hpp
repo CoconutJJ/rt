@@ -15,7 +15,7 @@ class Object {
         Object ();
         Object (Vec3 location, Material *material);
         Object (Vec3 location1, Vec3 location2, Material *material);
-        
+
         virtual ~Object () {};
         virtual bool hit (Ray r, HitRecord &record) = 0;
         virtual bool is_light_source () = 0;
