@@ -4,6 +4,7 @@ Working on a ray tracer to learn about computer graphics. This project is still
 very much work in progress!
 
 Currently includes:
+
 - Planes, Quads, Spheres
 - Texture Mapping
 - Lights: Point Lights, Quad Lights
@@ -11,6 +12,7 @@ Currently includes:
 - Path Tracing
 
 Still need to add:
+
 - Scene File Parser/Loader
 - Support for Meshes
 
@@ -49,7 +51,7 @@ ARGUMENTS:
 -l | --use_light_sampling   Use explicit light sampling
 ```
 
-In order to test the normal maps, I also created a tool that converts height 
+In order to test the normal maps, I also created a tool that converts height
 maps to normal maps. To compile this conversion tool, run:
 
 ```
@@ -60,11 +62,11 @@ This tool converts the height map into a +z normal map - +z is the normal direct
 
 ### Running Tests
 
-This project uses Catch2 for unit testing. All unit tests can be found in the 
+This project uses Catch2 for unit testing. All unit tests can be found in the
 `tests/` directory.
 
-
 To build the testing suite, use:
+
 ```
 $ make tests
 ```
@@ -76,7 +78,7 @@ The testing executables are located at `bin/test_*`.
 I first started by following this [online book](https://raytracing.github.io/),
 but halfway through the second book, I felt like this book was more focused on
 just implementing ray tracer instead of learning the actual concepts. So I
-started doing my own thing by reading these 
+started doing my own thing by reading these
 [lecture notes](http://www.cs.utoronto.ca/~strider/LectureNotes.html).
 
 ## Progress
@@ -90,7 +92,7 @@ Got texture maps working...
 
 <img src="static/iter2.png" width=500/>
 
-Started doing my own thing, following the lecture notes. Implemented Phong 
+Started doing my own thing, following the lecture notes. Implemented Phong
 illumination
 
 <img src="static/iter3.png" width=500/>
@@ -105,3 +107,6 @@ Path Tracing is working!
 
 <img src="static/iter6.png" width=500/>
 
+Glass and metal reflections and the whole lot!
+
+<img src="static/iter7.png" width=500/>

@@ -26,7 +26,9 @@ Vec3 ImageTexture::photon_map (Vec3 point)
 
 Vec3 ImageTexture::read_texture_uv (Vec3 uv, Vec3 point)
 {
-        return this->read_rgb255 (uv) / 255.0;
+        Vec3 color = this->read_rgb255 (uv) / 255.0;
+
+        return color * color;
 }
 
 Vec3 ImageTexture::read_rgb255 (Vec3 uv)

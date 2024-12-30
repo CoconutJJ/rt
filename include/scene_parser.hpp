@@ -1,9 +1,9 @@
 #pragma once
 #include "json.hpp"
 #include "material.hpp"
+#include "sphere.hpp"
 #include "texture.hpp"
 #include "world.hpp"
-#include "sphere.hpp"
 #include <map>
 #include <string>
 
@@ -16,8 +16,8 @@ class SceneParser {
         SceneParser ();
 
         World parse (const char *filename);
-        void parse_texture(json &obj);
+        void parse_texture (json &obj);
         void parse_material (json &obj);
         Material *read_material (std::string name);
-        Sphere *parse_sphere(SceneParser::json &obj);
+        Sphere *parse_sphere (SceneParser::json &obj);
 };

@@ -2,6 +2,7 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "smooth_object.hpp"
+#include "texture.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
 #include <iostream>
@@ -22,6 +23,7 @@ class Camera {
                 bool use_path_tracer;
                 bool use_light_sampling;
                 bool use_scene_sig;
+                Texture *background_texture;
         };
 
         std::ostream &stream;
@@ -66,4 +68,6 @@ class Camera {
         Vec3 pixel_00;
         Vec3 center;
         Vec3 lookat;
+
+        Texture *background_texture;
 };

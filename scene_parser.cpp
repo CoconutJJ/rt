@@ -2,11 +2,11 @@
 #include "image_texture.hpp"
 #include "lambertian.hpp"
 #include "material.hpp"
+#include "metal.hpp"
 #include "solid_texture.hpp"
 #include "texture.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
-#include "metal.hpp"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -51,43 +51,37 @@ void SceneParser::parse_texture (json &obj)
 }
 
 void SceneParser::parse_material (json &obj)
-{       
-
-        if (!obj.contains("name")) {
+{
+        if (!obj.contains ("name")) {
                 std::cerr << "Material must specify `name` key";
-                exit(EXIT_FAILURE);
+                exit (EXIT_FAILURE);
         }
-        
+
         std::string name = obj["name"];
 
-        if (!obj.contains("type")) {
+        if (!obj.contains ("type")) {
                 std::cerr << "Missing `type` key for material";
-                exit(EXIT_FAILURE);
+                exit (EXIT_FAILURE);
         }
 
         Material *material;
 
         if (obj["type"] == "lambertian") {
-
-                if (!obj.contains("reflectivity")) {
+                if (!obj.contains ("reflectivity")) {
                         std::cerr << "Missing `reflectivity` key for Lambertian Material: " << name;
-                        exit(EXIT_FAILURE);
+                        exit (EXIT_FAILURE);
                 }
 
                 double reflectivity = obj["reflectivity"];
 
-                if (!obj.contains("texture")) {
+                if (!obj.contains ("texture")) {
                         std::cerr << "Missing `texture` key for Lambertian Material: " << name;
-                        exit(EXIT_FAILURE);
+                        exit (EXIT_FAILURE);
                 }
 
                 material = new Lambertian (reflectivity, this->textures[name]);
 
         } else if (obj["type"] == "Metal") {
-
-                
-
-                
         }
 }
 

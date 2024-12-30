@@ -1,3 +1,4 @@
+// clang-format off
 //     __ _____ _____ _____
 //  __|  |   __|     |   | |  JSON for Modern C++
 // |  |  |__   |  |  | | | |  version 3.11.3
@@ -3239,10 +3240,10 @@ NLOHMANN_JSON_NAMESPACE_END
 
 
 #include <limits> // numeric_limits
+#include <string> // char_traits
+#include <tuple> // tuple
 #include <type_traits> // false_type, is_constructible, is_integral, is_same, true_type
 #include <utility> // declval
-#include <tuple> // tuple
-#include <string> // char_traits
 
 // #include <nlohmann/detail/iterators/iterator_traits.hpp>
 //     __ _____ _____ _____
@@ -5987,8 +5988,8 @@ NLOHMANN_JSON_NAMESPACE_END
 
 
 
-#include <cstdint> // uint8_t
 #include <cstddef> // size_t
+#include <cstdint> // uint8_t
 #include <functional> // hash
 
 // #include <nlohmann/detail/abi_macros.hpp>
@@ -9017,8 +9018,8 @@ NLOHMANN_JSON_NAMESPACE_END
 
 
 #include <cstdint> // size_t
-#include <utility> // declval
 #include <string> // string
+#include <utility> // declval
 
 // #include <nlohmann/detail/abi_macros.hpp>
 
@@ -14897,11 +14898,11 @@ NLOHMANN_JSON_NAMESPACE_END
 
 #include <algorithm> // reverse
 #include <array> // array
-#include <map> // map
 #include <cmath> // isnan, isinf
 #include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
 #include <cstring> // memcpy
 #include <limits> // numeric_limits
+#include <map> // map
 #include <string> // string
 #include <utility> // move
 #include <vector> // vector
@@ -16897,9 +16898,9 @@ NLOHMANN_JSON_NAMESPACE_END
 #include <cstddef> // size_t, ptrdiff_t
 #include <cstdint> // uint8_t
 #include <cstdio> // snprintf
+#include <iomanip> // setfill, setw
 #include <limits> // numeric_limits
 #include <string> // string, char_traits
-#include <iomanip> // setfill, setw
 #include <type_traits> // is_same
 #include <utility> // move
 

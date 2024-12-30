@@ -39,6 +39,7 @@ void Camera::initialize (struct RendererSettings settings)
         this->max_depth = settings.max_depth;
         this->use_light_sampling = settings.use_light_sampling;
         this->use_scene_sig = settings.use_scene_sig;
+        this->background_texture = settings.background_texture;
 
         this->lookat = Vec3 (0, 1, -1);
         this->center = Vec3 (0, 1, 1); // (1, 1, 4)
@@ -191,8 +192,8 @@ void Camera::write_color (Vec3 color)
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
 {
-        if (!dynamic_cast<Lambertian*>(record.object->material))
-                return Vec3(0,0,0);
+        if (!dynamic_cast<Lambertian *> (record.object->material))
+                return Vec3 (0, 0, 0);
 
         SmoothObject *light = world->random_light ();
 
@@ -229,13 +230,28 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
         for (int i = 0; i < depth; i++) {
                 HitRecord record;
 
-                if (!world->hit (starting_ray, record))
+                if (!world->hit (starting_ray, record)) {
+                        Vec3 sph = starting_ray.direction.unit ().sph ();
+
+                        Vec3 uv(sph[1] / (2* M_PI), sph[2] / M_PI, 0);
+
+
+                        radiances.push_back(this->background_texture->read_texture_uv (uv, uv));
+
+                        throughput.push_back (Vec3 (0, 0, 0));
+
                         break;
+                }
 
                 Vec3 brdf;
                 double pdf;
                 Vec3 scatter_dir = record.object->material->scatter (starting_ray, record, brdf, pdf);
-                double foreshortening_factor = -starting_ray.direction.unit ().dot (record.normal.unit ());
+                
+                double foreshortening_factor = 1;
+                
+                // check if reflection
+                if (scatter_dir.dot(starting_ray.direction) < 0)
+                        foreshortening_factor = -starting_ray.direction.unit ().dot (record.normal.unit ());
 
                 Vec3 radiance = record.object->material->emission ();
 
