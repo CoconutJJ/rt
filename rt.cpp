@@ -12,8 +12,8 @@
 #include "quad_light.hpp"
 #include "solid_texture.hpp"
 #include "sphere.hpp"
-#include "termcolor.hpp"
 #include "usage.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
 #include <cstddef>
@@ -39,9 +39,8 @@ World ray_trace_scene ()
         SolidTexture blue (Vec3 (0.01, 0.01, 1));
 
         Phong background (1, 0.5, 1, 0.01, 0, 1, 0, &blue);
-
         Phong glass (2, 0.5, 1, 0.03, 100, 0, 0.01, &white);
-
+        
         Plane backdrop (Vec3 (0, 0, -5), Vec3 (0, 0, 1), &background);
 
         SolidTexture light_t (Vec3 (0.5, 0.5, 0.5));
@@ -62,7 +61,7 @@ World ray_trace_scene ()
 
         return world;
 }
-// -framework Metal -framework Foundation -framework Cocoa -framework CoreGraphics -framework MetalKit
+
 struct Camera::RendererSettings process_arguments (int argc, char **argv, char *&filename, int &nthreads)
 {
         struct Camera::RendererSettings config;
@@ -169,22 +168,20 @@ int main (int argc, char **argv)
         struct Camera::RendererSettings config = process_arguments (argc, argv, filename, nthreads);
 
         if (!filename) {
-                std::cerr << "Must provide --out_file | -f argument.\n";
+                log_error ("Must provide --out_file | -f argument");
                 usage ();
                 exit (EXIT_FAILURE);
         }
 
         if (config.image_width == 0) {
-                std::cerr << "Must supply --image_width | -w argument.\n";
+                log_error ("Must supply --image_width | -w argument");
                 usage ();
                 exit (EXIT_FAILURE);
         }
 
-        if (config.use_path_tracer && config.samples_per_pixel < 500) {
-                std::cerr
-                        << termcolor::red << "WARNING: " << termcolor::reset
-                        << "path tracer is enabled, pixel sample count is very low! Consider setting sample count > 500.\n ";
-        }
+        if (config.use_path_tracer && config.samples_per_pixel < 500)
+                log_warn (
+                        "Path tracer is enabled, pixel sample count is very low! Consider setting sample count > 500.");
 
         Camera camera;
         camera.initialize (config);
@@ -212,25 +209,27 @@ int main (int argc, char **argv)
         Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
         Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &metal);
         Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light);
-        // Quad front_wall (Vec3 (1, 2, 0), Vec3 (0, -4, 0), Vec3 (-4, 0, 0), &white_diffuse);
-        // Mesh m ("assets/stanford-bunny.obj", Vec3 (0, 0.9, -0.5), &glass);
+        
         Sphere sp (Vec3 (0, 0.35, -1.1), 0.25, &glass);
         Sphere sp2 (Vec3 (-.5, 0.25, -1.1), 0.25, &glass);
         Sphere sp3 (Vec3 (.5, 0.30, -1.1), 0.25, &metal);
-        world.add (&left_wall);
-        world.add (&right_wall);
-        world.add (&back_wall);
-        world.add (&ceiling);
-        world.add (&floor);
-        world.add (&light_panel);
-        world.add (&sp);
-        world.add (&sp2);
-        world.add (&sp3);
+        
+        Mesh sp4("assets/sphere.obj", Vec3(0, 0.35, -1.1), &glass);
+
+        // world.add (&left_wall);
+        // world.add (&right_wall);
+        // world.add (&back_wall);
+        // world.add (&ceiling);
+        // world.add (&floor);
+        // world.add (&light_panel);
+        world.add (&sp4);
+        // world.add (&sp2);
+        // world.add (&sp3);
+
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();
 
         if (nthreads > 1) {
-                std::cerr << "rt running on " << nthreads << " threads.\n";
                 camera.render_multithreaded (&world, filename, nthreads);
         } else {
                 camera.render (&world, filename);

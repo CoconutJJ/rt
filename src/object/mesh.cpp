@@ -57,18 +57,9 @@ Vec3 Mesh::_compute_orig_mesh_center ()
 void Mesh::_load_mesh ()
 {
         this->triangles.clear ();
-        this->vertex_to_triangles.clear ();
         Vec3 orig_center = this->_compute_orig_mesh_center ();
 
         Vec3 delta = -orig_center + this->location;
-
-        std::vector<Vec3> vertices;
-
-        for (size_t i = 0; i < attrib.vertices.size () / 3; i++) {
-                Vec3 vertex = Vec3 (attrib.vertices[3 * i + 0], attrib.vertices[3 * i + 1], attrib.vertices[3 * i + 2]);
-                vertices.push_back (vertex + delta);
-        }
-        this->vertex_kdtree = KDTree (vertices);
 
         // Loop over shapes and convert each mesh into a triangle defined by two vectors
         for (size_t s = 0; s < shape.size (); s++) {
@@ -117,49 +108,19 @@ void Mesh::_load_mesh ()
                                 actual_normal = -actual_normal;
 
                         // construct triangle: add to list of triangles and verticies to triangle map
-                        Triangle tri = Triangle (vertices[0], vertices[1], vertices[2], actual_normal, this->material);
+                        Triangle *tri = new Triangle (vertices[0], vertices[1], vertices[2], actual_normal, this->material);
 
-                        tri.load_texture_coordinates (texcoords[0], texcoords[1], texcoords[2]);
+                        tri->load_texture_coordinates (texcoords[0], texcoords[1], texcoords[2]);
 
                         this->triangles.push_back (tri);
-                        this->vertex_to_triangles[vertices[0]].push_back (tri);
-                        this->vertex_to_triangles[vertices[1]].push_back (tri);
-                        this->vertex_to_triangles[vertices[2]].push_back (tri);
                 }
         }
+
+        this->triangle_kdtree = KDTree(this->triangles);
+
 }
 
 bool Mesh::hit (Ray r, HitRecord &record)
 {
-        std::vector<Vec3> verticies = this->vertex_kdtree.hit_bbox (r);
-
-        // std::cerr << "Vertex Count: " << verticies.size () << std::endl;
-
-        std::set<Triangle *> triangles;
-
-        for (Vec3 vertex : verticies) {
-                for (Triangle &tri : this->vertex_to_triangles[vertex]) {
-                        triangles.emplace (&tri);
-                }
-        }
-
-        // std::cerr << double(verticies.size()) / (attrib.vertices.size() / 3) << std::endl;
-
-        HitRecord best_record;
-        best_record.lambda = DBL_MAX;
-        for (Triangle *tri : triangles) {
-                HitRecord temp_record;
-                if (tri->hit (r, temp_record) && temp_record.lambda < best_record.lambda) {
-                        best_record = temp_record;
-                }
-        }
-
-        // std::cerr << "Triangles: " << triangle_count << std::endl;
-
-        if (best_record.lambda == DBL_MAX)
-                return false;
-
-        record = best_record;
-
-        return true;
+        return this->triangle_kdtree.ray_hit(r, record);
 }

@@ -1,11 +1,14 @@
 #include "utils.hpp"
 #include "mat3.hpp"
 #include "ray.hpp"
+#include "termcolor.hpp"
 #include "vec3.hpp"
 #include <cmath>
+#include <cstdarg>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
-
+#include <string>
 double clamp (double min, double x, double max)
 {
         if (x < min)
@@ -28,12 +31,32 @@ double deg2rad (double deg)
 
 Vec3 random_in_unit_disk ()
 {
-        while (true) {
-                Vec3 p = Vec3::random ();
+        double x = random_double (0, 1);
 
-                if (p.length () < 1)
-                        return p;
-        }
+        double y =
+                random_double (0, 1) < 0.5 ? sqrt (random_double (0, 1 - x * x)) : -sqrt (random_double (0, 1 - x * x));
+
+        return Vec3 (x, y, 0);
+}
+
+void log_error (std::string message)
+{
+        std::cerr << termcolor::red << "ERROR: " << termcolor::reset << message << std::endl;
+}
+
+void log_warn (std::string message)
+{
+        std::cerr << termcolor::yellow << "WARNING: " << termcolor::reset << message << std::endl;
+}
+
+void log_info (std::string message)
+{
+        std::cerr << termcolor::green << "INFO: " << termcolor::reset << message << std::endl;
+}
+
+std::pair<double, double> solve_quadratic (double a, double b, double c)
+{
+        double discr = b * b - 4 * a * c;
 }
 
 bool hit_box (Vec3 point,
@@ -64,8 +87,6 @@ bool hit_box (Vec3 point,
         lambda = _lambda;
         alpha = _alpha;
         beta = _beta;
-
-        // std::cerr << "AB:" << n << point << r.origin << std::endl;
 
         return (0 <= _alpha && _alpha <= u_length) && (0 <= _beta && _beta <= v_length);
 }

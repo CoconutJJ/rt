@@ -3,6 +3,7 @@
 #include "material.hpp"
 #include "smooth_object.hpp"
 #include "vec3.hpp"
+#include <vector>
 
 class Triangle : public SmoothObject {
     public:
@@ -16,7 +17,7 @@ class Triangle : public SmoothObject {
         Vec3 t1, t2, t3;
         // Texture projection matrix
         Mat3 T;
-
+        std::vector<Vec3> verticies();
         void load_texture_coordinates (Vec3 t1, Vec3 t2, Vec3 t3);
         bool inside (Vec3 point);
         bool hit (Ray r, HitRecord &record) override;

@@ -3,7 +3,6 @@
 #include "lambertian.hpp"
 #include "light.hpp"
 #include "material.hpp"
-#include "object.hpp"
 #include "progress_bar.hpp"
 #include "ray.hpp"
 #include "utils.hpp"
@@ -12,7 +11,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -88,8 +86,7 @@ Ray Camera::ray (int du, int dv)
         For the ray tracer, we need to shoot a ray to each light source. This
         method returns the diffuse and specular lighting components for the
         Blinn-Phong lighting model.
-
- */
+*/
 Vec3 Camera::sample_light_rays (World *world,
                                 HitRecord &record,
                                 Light *light,
@@ -137,6 +134,7 @@ Vec3 Camera::sample_light_rays (World *world,
 
         diffuse_component *= params.rd;
         specular_component *= params.rs;
+
         return diffuse_component * params.color + specular_component;
 }
 
@@ -192,14 +190,32 @@ void Camera::write_color (Vec3 color)
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
 {
+
+        /**
+                Light sampling only applies to diffuse materials.
+                Currently, Lambertian is the only diffuse material, this may
+                need to change in the future.
+         */
         if (!dynamic_cast<Lambertian *> (record.object->material))
                 return Vec3 (0, 0, 0);
+        
 
+        /**
+                Pick a light at random, if there are no lights, then it isn't
+                possible to perform light sampling.
+         */
         SmoothObject *light = world->random_light ();
 
         if (!light)
                 return Vec3::zero ();
+        
 
+        /**
+                Randomly select a point on the light surface and check if 
+                there is a clear path between the hit point and the randomly
+                selected point. If light ray is blocked, then there is no
+                contribution.
+         */
         Vec3 light_point = light->sample_point ();
 
         if (!world->has_path (record.hit_point, light_point))
@@ -207,12 +223,30 @@ Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_l
 
         hit_light = light;
 
+        /**
+                Compute the probability that a randomly emitted ray will hit the
+                light source.
+
+                This is done with the unit hemisphere oriented in the surface
+                normal direction at the hit point.
+
+                The area of the light multiplied by the foreshortening factor
+                determines how much area of the sphere, with radius the distance
+                from the light source to the hit point, the light covers from
+                the perspective of the hit point.
+
+                The area is divided the sphere's radius squared, to compute the
+                solid angle of the light.
+
+                Then finally divided by 2 PI (the number of steradians in a
+                hemisphere)
+
+                LIGHT_AREA * dot(L, N)
+
+         */
         Vec3 to_light = light_point - record.hit_point;
-
         double light_area = light->area ();
-
         double light_distance = to_light.length ();
-
         double foreshortening_factor = -to_light.unit ().dot (light->normal (light_point).unit ());
 
         double ray_prob = fmax (0,
@@ -233,25 +267,22 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
                 if (!world->hit (starting_ray, record)) {
                         Vec3 sph = starting_ray.direction.unit ().sph ();
 
-                        Vec3 uv(sph[1] / (2* M_PI), sph[2] / M_PI, 0);
+                        Vec3 uv (sph[1] / (2 * M_PI), sph[2] / M_PI, 0);
 
-
-                        radiances.push_back(this->background_texture->read_texture_uv (uv, uv));
-
+                        radiances.push_back (this->background_texture->read_texture_uv (uv, uv));
                         throughput.push_back (Vec3 (0, 0, 0));
 
                         break;
                 }
 
-                Vec3 brdf;
                 double pdf;
+                Vec3 brdf;
                 Vec3 scatter_dir = record.object->material->scatter (starting_ray, record, brdf, pdf);
-                
                 double foreshortening_factor = 1;
-                
+
                 // check if reflection
-                if (scatter_dir.dot(starting_ray.direction) < 0)
-                        foreshortening_factor = -starting_ray.direction.unit ().dot (record.normal.unit ());
+                if (scatter_dir.dot (starting_ray.direction) < 0)
+                        foreshortening_factor = std::abs (scatter_dir.unit ().dot (record.normal.unit ()));
 
                 Vec3 radiance = record.object->material->emission ();
 
@@ -267,15 +298,14 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
                         if (light_sample != Vec3::zero ()) {
                                 HitRecord next_record;
 
-                                if (world->hit (starting_ray, next_record)) {
-                                        if (next_record.object != light) {
-                                                radiance += light_sample;
-                                        }
-                                } else {
+                                if (!world->hit (starting_ray, next_record)) {
+                                        radiance += light_sample;
+                                } else if (next_record.object != light) {
                                         radiance += light_sample;
                                 }
                         }
                 }
+
                 radiances.emplace_back (radiance);
 
                 if (record.object->material->is_emissive ())

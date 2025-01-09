@@ -7,7 +7,7 @@ include_directories(include)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
@@ -47,9 +47,6 @@ target_link_libraries(test_mesh utils ds object world pt catch2)
 add_custom_target(tests DEPENDS test_KDTree test_utils test_mesh)
 
 include(Catch)
-
-
-
 catch_discover_tests(test_KDTree WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 # -fprofile-instr-generate -fcoverage-mapping

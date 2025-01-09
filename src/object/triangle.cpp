@@ -5,6 +5,7 @@
 #include "smooth_object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
+#include <vector>
 
 Triangle::Triangle (Vec3 point, Vec3 u, Vec3 v, Material *material) : SmoothObject (point, material)
 {
@@ -48,6 +49,11 @@ Triangle &Triangle::operator= (Triangle &triangle)
         return *this;
 }
 
+std::vector<Vec3> Triangle::verticies ()
+{
+        return std::vector<Vec3> ({ this->location, this->location + this->u, this->location + this->v });
+}
+
 void Triangle::center (Vec3 point)
 {
         Vec3 center = (3 * this->location + this->u + this->v) / 3;
@@ -82,7 +88,7 @@ bool Triangle::hit (Ray r, HitRecord &record)
 
         if (!this->inside (hit_point))
                 return false;
-        
+
         record.lambda = lambda;
         record.hit_point = hit_point;
         record.uv = this->to_uv (record.hit_point);

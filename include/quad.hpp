@@ -9,6 +9,7 @@ class Quad : public SmoothObject {
         bool hit (Ray r, HitRecord &record) override;
 
         Vec3 find_alpha_beta (Vec3 point);
+        bool &one_sided();
         Vec3 to_uv (Vec3 point) override;
         Vec3 get_point (double alpha, double beta);
         Vec3 tangent (Vec3 point) override;
@@ -16,4 +17,7 @@ class Quad : public SmoothObject {
         Vec3 sample_point () override;
         double area () override;
         Vec3 v1, v2;
+        
+        private:
+        bool _one_sided;
 };
