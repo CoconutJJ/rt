@@ -5,7 +5,6 @@
 #include "smooth_object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
-#include <cstddef>
 
 Quad::Quad (Vec3 location, Vec3 v1, Vec3 v2, Material *mat) : SmoothObject (location, mat), _one_sided(false)
 {
@@ -41,7 +40,6 @@ bool Quad::hit (Ray r, HitRecord &record)
                 opposing the normal direction will register as a hit.
 
                 i.e quad is invisible from back side.
-        
          */
         if (this->one_sided ())
                 if (normal.dot (this->v1.cross (this->v2)) > 0)

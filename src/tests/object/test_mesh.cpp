@@ -1,4 +1,4 @@
-#include "catch_amalgamated.hpp"
+#include "lib/catch_amalgamated.hpp"
 #include "hitrecord.hpp"
 #include "mesh.hpp"
 #include "material.hpp"

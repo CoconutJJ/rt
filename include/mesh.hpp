@@ -22,31 +22,23 @@
 #include "kdtree.hpp"
 #include "material.hpp"
 #include "object.hpp"
-#include "tiny_obj_loader.h"
 #include "triangle.hpp"
 #include "vec3.hpp"
-#include <map>
 #include <vector>
 
 class Mesh : public Object {
     public:
-        Mesh (const char *filename, Vec3 location, Material *material);
+        Mesh (const char *filename, Vec3 location, double scale, Material *material);
         KDTree triangle_kdtree;
 
         std::vector<Triangle *> triangles;
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shape;
-        std::vector<tinyobj::material_t> mats;
-
         char *obj_filename;
         double scale;
         bool is_light_source () override;
         bool hit (Ray r, HitRecord &record) override;
-        void vertex_average (Vec3 center);
-        void center (Vec3 center);
-        Vec3 _compute_orig_mesh_center ();
-        std::vector<int> convex_hull ();
+
 
     private:
         void _load_mesh ();
+        Vec3 _transform_vertex(Vec3 v);
 };

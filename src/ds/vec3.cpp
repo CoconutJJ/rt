@@ -131,12 +131,14 @@ bool Vec3::operator< (Vec3 b) const
 
 double Vec3::dot (Vec3 b)
 {
-        return this->x * b.x + this->y * b.y + this->z * b.z;
+        return std::fma (this->z, b.z, sum_of_products (this->x, b.x, this->y, b.y));
 }
 
 Vec3 Vec3::cross (Vec3 b)
 {
-        return Vec3 (this->y * b.z - this->z * b.y, this->z * b.x - this->x * b.z, this->x * b.y - this->y * b.x);
+        return Vec3 (difference_of_products (this->y, b.z, this->z, b.y),
+                     difference_of_products (this->z, b.x, this->x, b.z),
+                     difference_of_products (this->x, b.y, this->y, b.x));
 }
 
 double Vec3::length_squared ()

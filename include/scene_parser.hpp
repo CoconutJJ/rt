@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "lib/json.hpp"
 #include "material.hpp"
 #include "sphere.hpp"
 #include "texture.hpp"

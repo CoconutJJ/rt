@@ -2,6 +2,8 @@
 #include "mat3.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+#include "material.hpp"
+#include "triangle.hpp"
 double clamp (double min, double x, double max);
 double random_double (double min, double max);
 double deg2rad (double deg);
@@ -19,3 +21,7 @@ void log_error (std::string message);
 void log_warn (std::string message);
 void log_info (std::string message);
 Mat3 texture_projection_matrix (Vec3 xy1, Vec3 xy2, Vec3 xy3, Vec3 uv1, Vec3 uv2, Vec3 uv3);
+std::vector<Triangle *> load_obj_mesh (char *obj_filename, Material *material);
+Vec3 compute_mesh_centroid (std::vector<Triangle *> mesh_triangles);
+double difference_of_products (double a, double b, double c, double d);
+double sum_of_products (double a, double b, double c, double d);

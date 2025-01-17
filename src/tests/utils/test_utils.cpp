@@ -1,4 +1,4 @@
-#include "catch_amalgamated.hpp"
+#include "lib/catch_amalgamated.hpp"
 
 #include "mat3.hpp"
 #include "utils.hpp"

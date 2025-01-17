@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.30)
-set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.6/bin/clang++")
+# set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+# set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
 
-project(rt)
+project(rt CXX C)
 
 include_directories(include)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
@@ -26,12 +27,12 @@ add_library(material STATIC "src/material/material.cpp" "src/material/phong.cpp"
 add_library(light STATIC "src/light/light.cpp" "src/light/point_light.cpp" "src/light/quad_light.cpp")
 add_library(io STATIC "src/io/obj.cpp")
 add_library(catch2 "src/tests/catch_amalgamated.cpp")    
-
+add_library(rply "src/rply.c")
 add_executable(rt "rt.cpp")
 add_executable(height_map_conv "src/scripts/bin/height_map.cpp" "src/utils.cpp")
 add_executable(obj_file "src/scripts/bin/obj_file.cpp" "src/utils.cpp")
 
-target_link_libraries(rt ds world texture object material light io utils)
+target_link_libraries(rt ds world texture object material light io utils rply)
 target_link_libraries(height_map_conv ds)
 target_link_libraries(obj_file ds io)
 

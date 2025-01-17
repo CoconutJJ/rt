@@ -13,7 +13,6 @@ class Ray {
         Vec3 color;
 
         Vec3 at (double t);
-        Ray nudge (double maxX, double maxY);
 
         bool can_refract (Vec3 normal, double mu);
 };
