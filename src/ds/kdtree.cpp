@@ -2,11 +2,14 @@
 #include "hitrecord.hpp"
 #include "ray.hpp"
 #include "triangle.hpp"
+#include "utils.hpp"
 #include "vec3.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cfloat>
 #include <cstddef>
 #include <cstdlib>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -81,13 +84,18 @@ std::pair<KDTree::BoundingBox, KDTree::BoundingBox> KDTree::BoundingBox::split (
         return std::make_pair (left, right);
 }
 
+bool KDTree::BoundingBox::is_reversed (Ray r, int axis)
+{
+        return r.origin[axis] > this->max[axis] && r.direction[axis] < 0;
+}
+
 int KDTree::BoundingBox::longest_dim ()
 {
         int axis = -1;
-        double dim_length = -DBL_MAX;
+        double dim_length = 0;
 
         for (int i = 0; i < 3; i++) {
-                double len = this->max[i] - this->min[i];
+                double len = std::abs (this->max[i] - this->min[i]);
 
                 if (len > dim_length) {
                         dim_length = len;
@@ -100,18 +108,20 @@ int KDTree::BoundingBox::longest_dim ()
 
 std::pair<double, double> KDTree::BoundingBox::_one_dim_ray_intersection (Ray r, int axis, bool &reversed)
 {
-        if (r.direction[axis] == 0) {
-                reversed = false;
-                return std::make_pair (-DBL_MAX, DBL_MAX);
-        }
+        // if (r.direction[axis] == 0) {
+        //         reversed = false;
+        //         return std::make_pair (-DBL_MAX, DBL_MAX);
+        // }
 
-        double t1 = (this->min[axis] - r.origin[axis]) / r.direction[axis];
-        double t2 = (this->max[axis] - r.origin[axis]) / r.direction[axis];
+        double min = this->min[axis], max = this->max[axis];
 
-        reversed = t1 > t2;
+        reversed = r.direction[axis] < 0;
 
         if (reversed)
-                std::swap (t1, t2);
+                std::swap (min, max);
+
+        double t1 = (min - r.origin[axis]) / r.direction[axis];
+        double t2 = (max - r.origin[axis]) / r.direction[axis];
 
         return std::make_pair (t1, t2);
 }
@@ -241,11 +251,22 @@ bool KDTree::_compute_bounding_box_tree_ray_hit (struct BoundingBoxNode *root, R
                 return hit_anything;
         }
 
+        /**
+                KD Tree Debug Log:
+
+                1. Tried removing early ray termination and traversing both left and right and taking smallest lambda:
+                   FIXES THE PROBLEM! This means something is wrong the early ray termination code
+
+                2. Somtimes far lambda is less than near lambda
+
+         */
+
         // Always split the longest dimension
         int split_dim = root->box.longest_dim ();
 
         // Early Ray Termination: compute ray intersection with bounding box
         // split plane
+
         double lambda_mid = (root->left->box.max[split_dim] - r.origin[split_dim]) / r.direction[split_dim];
 
         // We must determine which bounding box is the front box and which one
@@ -265,10 +286,13 @@ bool KDTree::_compute_bounding_box_tree_ray_hit (struct BoundingBoxNode *root, R
                 return this->_compute_bounding_box_tree_ray_hit (front, r, record);
         } else {
                 // termination step: only intersect with back box if ray misses everything in front box.
-                if (!this->_compute_bounding_box_tree_ray_hit (front, r, record))
-                        return this->_compute_bounding_box_tree_ray_hit (back, r, record);
 
-                return true;
+                if (this->_compute_bounding_box_tree_ray_hit (front, r, record)) {
+                        if (record.lambda <= lambda_mid)
+                                return true;
+                }
+
+                return this->_compute_bounding_box_tree_ray_hit (back, r, record);
         }
 }
 

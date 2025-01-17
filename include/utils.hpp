@@ -25,3 +25,4 @@ std::vector<Triangle *> load_obj_mesh (char *obj_filename, Material *material);
 Vec3 compute_mesh_centroid (std::vector<Triangle *> mesh_triangles);
 double difference_of_products (double a, double b, double c, double d);
 double sum_of_products (double a, double b, double c, double d);
+bool nearlyEqual(double a, double b);

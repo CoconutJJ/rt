@@ -21,7 +21,7 @@ Ray::Ray (Vec3 origin, Vec3 direction, Vec3 color) : origin (origin), direction 
 
 Vec3 Ray::at (double t)
 {
-        return this->origin + this->direction * t; //* (1 - 0.0001);
+        return this->origin + this->direction * t * (1 - 0.0001);
 }
 
 bool Ray::can_refract (Vec3 normal, double mu)

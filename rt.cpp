@@ -214,14 +214,14 @@ int main (int argc, char **argv)
         Sphere sp2 (Vec3 (-.5, 0.25, -1.1), 0.25, &glass);
         Sphere sp3 (Vec3 (.5, 0.30, -1.1), 0.25, &metal);
         
-        Mesh sp4("assets/bunny.obj", Vec3(0, 0.6, -1.1), 20, &glass);
+        Mesh sp4("assets/dragon.obj", Vec3(0, 0.6, -1.1), 9, &glass);
 
-        world.add (&left_wall);
-        world.add (&right_wall);
-        world.add (&back_wall);
-        world.add (&ceiling);
-        world.add (&floor);
-        world.add (&light_panel);
+        // world.add (&left_wall);
+        // world.add (&right_wall);
+        // world.add (&back_wall);
+        // world.add (&ceiling);
+        // world.add (&floor);
+        // world.add (&light_panel);
         world.add (&sp4);
         // world.add (&sp2);
         // world.add (&sp3);

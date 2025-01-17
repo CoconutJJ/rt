@@ -59,6 +59,11 @@ double sum_of_products (double a, double b, double c, double d)
         return fma (a, b, cd) - err;
 }
 
+bool nearlyEqual(double a, double b) {
+
+        return fabs(a - b) < 1e-8;
+}
+
 Vec3 random_in_unit_disk ()
 {
         double x = random_double (0, 1);
