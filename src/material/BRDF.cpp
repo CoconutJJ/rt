@@ -21,8 +21,10 @@
 #include "BRDF.hpp"
 #include "hitrecord.hpp"
 #include "mat3.hpp"
+#include "material.hpp"
 #include "math.h"
 #include "stdlib.h"
+#include "texture.hpp"
 #include "vec3.hpp"
 #include <cmath>
 #include <cstdio>
@@ -240,7 +242,7 @@ bool read_brdf (const char *filename, double *&brdf)
         return true;
 }
 
-BRDF::BRDF (const char *filename)
+BRDF::BRDF (const char *filename, Texture *texture) : Material(texture, nullptr)
 {
         if (!read_brdf (filename, this->brdf))
                 throw std::logic_error ("Could not open BRDF file");
@@ -274,10 +276,10 @@ Vec3 BRDF::compute (Mat3 tnb, Vec3 in_direction, Vec3 out_direction)
 
 Vec3 BRDF::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
 {
-        Vec3 direction = Vec3::random_hemisphere ();
         ray_prob = 1;
 
         Mat3 tnb = record.object->tnb (record);
+        Vec3 direction = tnb * Vec3::random_hemisphere ();
 
         brdf = this->compute (tnb, r.direction, direction);
 

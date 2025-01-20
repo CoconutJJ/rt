@@ -77,7 +77,7 @@ bool Sphere::hit (Ray r, HitRecord &record)
         double b = r.direction.dot (r.origin - current_center) * 2.0;
         double c = (current_center - r.origin).dot (current_center - r.origin) - this->radius * this->radius;
 
-        double discriminant = b * b - 4 * a * c;
+        double discriminant = difference_of_products(b, b, 4 * a, c);
 
         if (discriminant < 0)
                 return false;

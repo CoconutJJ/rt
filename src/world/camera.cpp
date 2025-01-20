@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -38,6 +39,7 @@ void Camera::initialize (struct RendererSettings settings)
         this->use_light_sampling = settings.use_light_sampling;
         this->use_scene_sig = settings.use_scene_sig;
         this->background_texture = settings.background_texture;
+        this->use_importance_sampling = settings.use_importance_sampling;
 
         this->lookat = Vec3 (0, 1, -1);
         this->center = Vec3 (0, 1, 1); // (1, 1, 4)
@@ -63,6 +65,18 @@ void Camera::initialize (struct RendererSettings settings)
 
         this->defocus_disk_u = u * defocus_radius;
         this->defocus_disk_v = v * defocus_radius;
+}
+
+void Camera::print_arguments ()
+{
+        log_info ("Image Size (w x h):      %d x %d", this->image_width, this->image_height);
+        log_info ("Samples Per Pixel:       %d", this->samples_per_pixel);
+        log_info ("Vertical Field of View:  %lf degrees", this->vfov);
+        log_info ("Ray Bounce Max Depth:    %d", this->max_depth);
+        log_info ("Defocus Angle:           %d", this->defocus_angle);
+        log_info ("Path Tracing:            %s", this->use_path_tracer ? "Enabled" : "Disabled");
+        log_info ("Importance Sampling:     %s", this->use_importance_sampling ? "Enabled" : "Disabled");
+        log_info ("Explicit Light Sampling: %s", this->use_light_sampling ? "Enabled" : "Disabled");
 }
 
 Vec3 Camera::defocus_disk_sample ()
@@ -190,7 +204,6 @@ void Camera::write_color (Vec3 color)
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
 {
-
         /**
                 Light sampling only applies to diffuse materials.
                 Currently, Lambertian is the only diffuse material, this may
@@ -198,7 +211,6 @@ Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_l
          */
         if (!dynamic_cast<Lambertian *> (record.object->material))
                 return Vec3 (0, 0, 0);
-        
 
         /**
                 Pick a light at random, if there are no lights, then it isn't
@@ -208,10 +220,9 @@ Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_l
 
         if (!light)
                 return Vec3::zero ();
-        
 
         /**
-                Randomly select a point on the light surface and check if 
+                Randomly select a point on the light surface and check if
                 there is a clear path between the hit point and the randomly
                 selected point. If light ray is blocked, then there is no
                 contribution.
@@ -247,13 +258,14 @@ Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_l
         Vec3 to_light = light_point - record.hit_point;
         double light_area = light->area ();
         double light_distance = to_light.length ();
-        double foreshortening_factor = -to_light.unit ().dot (light->normal (light_point).unit ());
+        double projected_area_of_light = -to_light.unit ().dot (light->normal (light_point).unit ()) * light_area;
 
-        double ray_prob = fmax (0,
-                                (light_area * foreshortening_factor * to_light.unit ().dot (record.normal)) /
-                                        (light_distance * light_distance * 2 * M_PI));
+        double steradians_on_unit_hemisphere = projected_area_of_light / (light_distance * light_distance);
 
-        return light->material->emission () * ray_prob * record.object->material->color (record);
+        double ray_prob = steradians_on_unit_hemisphere / (2 * M_PI);
+
+        return light->material->emission () * fmax (0, ray_prob * to_light.unit ().dot (record.normal)) *
+               record.object->material->color (record);
 }
 
 Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
@@ -278,17 +290,15 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
                 double pdf;
                 Vec3 brdf;
                 Vec3 scatter_dir = record.object->material->scatter (starting_ray, record, brdf, pdf);
-                double foreshortening_factor = 1;
-
-                // check if reflection
-                if (scatter_dir.dot (starting_ray.direction) < 0)
-                        foreshortening_factor = std::abs (scatter_dir.unit ().dot (record.normal.unit ()));
+                double lambert_cos = scatter_dir.unit ().dot (record.normal.unit ());
 
                 Vec3 radiance = record.object->material->emission ();
 
-                throughput.push_back (brdf * foreshortening_factor * record.object->material->color (record) / pdf);
+                throughput.push_back (brdf * lambert_cos / pdf);
 
                 starting_ray = Ray (record.hit_point, scatter_dir);
+
+                starting_ray.nudge_forward ();
 
                 if (this->use_light_sampling) {
                         SmoothObject *light;
@@ -317,12 +327,12 @@ Vec3 Camera::single_path_color (Ray starting_ray, World *world, int depth)
 
         Vec3 throughput_product (1, 1, 1);
 
-        for (int j = 0; j < radiances.size (); j++) {
+        for (size_t j = 0; j < radiances.size (); j++) {
                 throughput_product = throughput_product * throughput[j];
                 throughput_partial_products.push_back (throughput_product);
         }
 
-        for (int i = 0; i < radiances.size (); i++) {
+        for (size_t i = 0; i < radiances.size (); i++) {
                 total_radiance += radiances[i] * throughput_partial_products[i];
         }
 
@@ -384,6 +394,9 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         std::counting_semaphore<> progress (0);
         std::vector<std::thread> threads;
         std::vector<Vec3> pixels (this->image_width * this->image_height);
+
+        log_info ("Rendering on %d threads with the following arguments:", max_threads);
+        this->print_arguments ();
 
         for (int j = 0; j < this->image_height; j++) {
                 threads.push_back (std::thread ([&, j] {

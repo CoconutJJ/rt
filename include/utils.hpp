@@ -17,9 +17,9 @@ bool hit_box (Vec3 point,
               double &alpha,
               double &beta,
               double &lambda);
-void log_error (std::string message);
-void log_warn (std::string message);
-void log_info (std::string message);
+void log_error (const char * message, ...);
+void log_warn (const char * message, ...);
+void log_info (const char * message, ...);
 Mat3 texture_projection_matrix (Vec3 xy1, Vec3 xy2, Vec3 xy3, Vec3 uv1, Vec3 uv2, Vec3 uv3);
 std::vector<Triangle *> load_obj_mesh (char *obj_filename, Material *material);
 Vec3 compute_mesh_centroid (std::vector<Triangle *> mesh_triangles);

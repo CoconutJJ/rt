@@ -23,6 +23,7 @@ class Camera {
                 bool use_path_tracer;
                 bool use_light_sampling;
                 bool use_scene_sig;
+                bool use_importance_sampling;
                 Texture *background_texture;
         };
 
@@ -42,7 +43,7 @@ class Camera {
         Vec3 sample_light_rays (World *world, HitRecord &record, Light *light, Material::PhongParams params, int K);
         Vec3 sample_light (World *world, HitRecord &record, SmoothObject *&hit_light);
         Vec3 defocus_disk_sample ();
-
+        void print_arguments();
     private:
         int image_width;
         int image_height;
@@ -59,6 +60,7 @@ class Camera {
 
         bool use_path_tracer;
         bool use_light_sampling;
+        bool use_importance_sampling;
         bool use_scene_sig;
 
         Vec3 defocus_disk_u;

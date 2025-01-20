@@ -157,7 +157,7 @@ void World::photon_map_forward_pass ()
                                         if (depth == max_depth)
                                                 continue;
 
-                                        struct Photon p = { .color = curr_ray.color, .point = record.hit_point };
+                                        struct Photon p = {  .point = record.hit_point, .color = curr_ray.color };
                                         this->photons.push_back (p);
 
                                 } else {

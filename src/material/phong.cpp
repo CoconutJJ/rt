@@ -25,9 +25,9 @@ Phong::Phong (double rs, double rd, double ra, double rg, double shininess, doub
 }
 Phong::PhongParams Phong::phong (Ray r, HitRecord &record)
 {
-        return PhongParams{ .ra = this->ra,
+        return PhongParams{ .rs = this->rs,
+                            .ra = this->ra,
                             .rd = this->rd,
-                            .rs = this->rs,
                             .alpha = this->shininess,
                             .gamma = this->gamma,
                             .mu = this->mu,

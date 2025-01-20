@@ -13,6 +13,6 @@ class Ray {
         Vec3 color;
 
         Vec3 at (double t);
-
+        void nudge_forward();
         bool can_refract (Vec3 normal, double mu);
 };

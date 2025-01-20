@@ -1,10 +1,14 @@
 #pragma once
 #include "mat3.hpp"
 #include "material.hpp"
+#include "texture.hpp"
 #include "vec3.hpp"
-class BRDF : Material {
+class BRDF : public Material {
     public:
-        BRDF (const char *filename);
+
+        typedef double (*PDF)(double);
+
+        BRDF (const char *filename, Texture * texture);
         double *brdf;
         Mat3 sph_basis (double theta, double phi);
         Vec3 compute (Mat3 tnb, Vec3 in_direction, Vec3 out_direction);

@@ -9,9 +9,11 @@
 #include "lib/rply.h"
 #include "lib/rplyfile.h"
 
+#include <cstdarg>
 #include <cstddef>
 #include <cstdio>
 #include <stdexcept>
+#include <xlocale/_stdio.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -59,9 +61,9 @@ double sum_of_products (double a, double b, double c, double d)
         return fma (a, b, cd) - err;
 }
 
-bool nearlyEqual(double a, double b) {
-
-        return fabs(a - b) < 1e-8;
+bool nearlyEqual (double a, double b)
+{
+        return fabs (a - b) < 1e-8;
 }
 
 Vec3 random_in_unit_disk ()
@@ -74,19 +76,39 @@ Vec3 random_in_unit_disk ()
         return Vec3 (x, y, 0);
 }
 
-void log_error (std::string message)
+void log_error (const char *message, ...)
 {
-        std::cerr << termcolor::red << "ERROR: " << termcolor::reset << message << std::endl;
+        va_list args;
+
+        va_start (args, message);
+
+        std::cerr << termcolor::red << "ERROR: " << termcolor::reset;
+
+        vfprintf (stderr, message, args);
+        fputc ('\n', stderr);
+
+        va_end (args);
 }
 
-void log_warn (std::string message)
+void log_warn (const char *message, ...)
 {
-        std::cerr << termcolor::yellow << "WARNING: " << termcolor::reset << message << std::endl;
+        va_list args;
+
+        va_start (args, message);
+        std::cerr << termcolor::yellow << "WARNING: " << termcolor::reset;
+        vfprintf (stderr, message, args);
+        fputc ('\n', stderr);
 }
 
-void log_info (std::string message)
+void log_info (const char *message, ...)
 {
-        std::cerr << termcolor::green << "INFO: " << termcolor::reset << message << std::endl;
+        va_list args;
+
+        va_start (args, message);
+        std::cerr << termcolor::green << "INFO: " << termcolor::reset;
+
+        vfprintf (stderr, message, args);
+        fputc ('\n', stderr);
 }
 
 Mat3 rotateX (double deg)

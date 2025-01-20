@@ -4,7 +4,6 @@
 #include "material.hpp"
 #include "object.hpp"
 #include "vec3.hpp"
-#include <stdexcept>
 
 SmoothObject::SmoothObject (Vec3 location, Material *material) : Object (location, material)
 {
@@ -55,9 +54,9 @@ Mat3 SmoothObject::tbn (Vec3 point)
  */
 Mat3 SmoothObject::tnb (HitRecord &record)
 {
-        Vec3 tangent = this->tangent (record.hit_point);
+        Vec3 tangent = this->tangent (record.hit_point).unit();
 
-        Mat3 tnb (tangent, record.normal, record.normal.cross (tangent));
+        Mat3 tnb (tangent, record.normal.unit(), record.normal.cross (tangent).unit());
 
         return tnb;
 }

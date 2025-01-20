@@ -7,11 +7,12 @@
 #include "vec3.hpp"
 
 #include <cmath>
+#include <iostream>
 
 Dielectric::Dielectric (double refraction_index, double absorption)
-        : refraction_index (refraction_index), absorption (absorption)
+        : Material (new SolidTexture (Vec3 (1, 1, 1)), nullptr), refraction_index (refraction_index),
+          absorption (absorption)
 {
-        this->texture = new SolidTexture (Vec3 (1, 1, 1));
 }
 
 Dielectric::~Dielectric ()
@@ -33,27 +34,30 @@ Vec3 Dielectric::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob
                 double d = (record.lambda * r.direction).length ();
                 attenuation = exp (-absorption * d);
         }
-
+        
         double refl = reflectance (cos_theta, mu);
+        brdf = Vec3 (attenuation, attenuation, attenuation);
 
         if (!r.can_refract (record.normal, mu)) {
-                refl = 1;
-
-                brdf = Vec3 (1, 1, 1) * refl * attenuation;
-                ray_prob = refl;
-                return unit_direction.reflect (record.normal);
-        }
-
-        if (random_double (0, 1) < refl) {
+                ray_prob = 1;
                 direction = unit_direction.reflect (record.normal);
-                brdf = Vec3 (1, 1, 1) * refl * attenuation;
-                ray_prob = refl;
-
         } else {
-                direction = unit_direction.refract (record.normal, mu);
-                brdf = (1 - refl) * Vec3 (1, 1, 1) * attenuation;
-                ray_prob = 1 - refl;
+                if (random_double (0, 1) < refl) {
+                        direction = unit_direction.reflect (record.normal);
+                        ray_prob = refl;
+
+                } else {
+                        direction = unit_direction.refract (record.normal, mu);
+                        ray_prob = 1 - refl;
+                }
         }
+
+        /**
+                Glass is a perfect reflector, we divide by the lamertian
+                cosine to cancel out the lambertian fall off.
+         */
+        double lambert_cos = direction.unit ().dot (record.normal);
+        brdf *= ray_prob / lambert_cos;
 
         return direction;
 }

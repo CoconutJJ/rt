@@ -14,7 +14,6 @@ Currently includes:
 Still need to add:
 
 - Scene File Parser/Loader
-- Support for Meshes
 
 ## How to run
 
@@ -110,3 +109,8 @@ Path Tracing is working!
 Glass and metal reflections and the whole lot!
 
 <img src="static/iter7.png" width=500/>
+
+
+## Credits
+- Matusik, W., Pfister, H., Brand, M., & McMillan, L. (2003). A Data-Driven Reflectance Model. ACM Transactions on Graphics, 22(3), 759–769. 
+- Pharr, M., Jakob, W., & Humphreys, G. (2023). Physically Based Rendering, Fourth Edition: From Theory to Implementation (4th ed.). MIT Press. 
