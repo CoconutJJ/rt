@@ -40,15 +40,12 @@ Sphere::Sphere (Vec3 from, Vec3 to, double radius, Material *material) : SmoothO
 */
 Vec3 Sphere::tangent (double theta, double phi)
 {
-        return Vec3 (-this->radius * std::sin (phi) * std::sin (theta),
-                     0,
-                     -this->radius * std::sin (phi) * std::cos (theta))
-                .unit ();
+        return Vec3 (-std::sin (phi) * std::sin (theta), 0, -std::sin (phi) * std::cos (theta));
 }
 
 Vec3 Sphere::tangent (Vec3 point)
 {
-        Vec3 sphere_coord = this->spherical_coord (point);
+        Vec3 sphere_coord = (point - location).sph ();
 
         return this->tangent (sphere_coord.y, sphere_coord.z);
 }
@@ -58,26 +55,13 @@ Vec3 Sphere::normal (Vec3 point)
         return (point - this->location).unit ();
 }
 
-Vec3 Sphere::spherical_coord (Vec3 point)
-{
-        point = point - this->location;
-
-        double theta = this->argument (-point.z, point.x);
-
-        double phi = std::acos (point.y / point.length ());
-
-        return Vec3 (point.length (), theta, phi);
-}
-
 bool Sphere::hit (Ray r, HitRecord &record)
 {
-        Vec3 current_center = this->location_at_time (r.time);
-
         double a = r.direction.dot (r.direction);
-        double b = r.direction.dot (r.origin - current_center) * 2.0;
-        double c = (current_center - r.origin).dot (current_center - r.origin) - this->radius * this->radius;
+        double b = r.direction.dot (r.origin - this->location) * 2.0;
+        double c = (this->location - r.origin).dot (this->location - r.origin) - this->radius * this->radius;
 
-        double discriminant = difference_of_products(b, b, 4 * a, c);
+        double discriminant = difference_of_products (b, b, 4 * a, c);
 
         if (discriminant < 0)
                 return false;
@@ -100,21 +84,13 @@ bool Sphere::hit (Ray r, HitRecord &record)
 
 double Sphere::argument (double y_opp, double x_adj)
 {
-        double y = std::abs (y_opp);
-        double x = std::abs (x_adj);
+        double arg = std::atan2 (y_opp, x_adj);
 
-        if (x_adj > 0 && y_opp >= 0)
-                return std::atan (y / x);
-        else if (x_adj < 0 && y_opp >= 0)
-                return M_PI - std::atan (y / x);
-        else if (x_adj < 0 && y_opp <= 0)
-                return M_PI + std::atan (y / x);
-        else
-                return 2 * M_PI - std::atan (y / x);
+        return (arg < 0) ? 2 * M_PI - arg : arg;
 }
 Vec3 Sphere::to_uv (Vec3 point)
 {
-        Vec3 sphere_coord = this->spherical_coord (point);
+        Vec3 sphere_coord = point.sph ();
 
         double theta = sphere_coord.y;
         double phi = sphere_coord.z;

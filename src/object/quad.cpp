@@ -33,7 +33,7 @@ Vec3 Quad::find_alpha_beta (Vec3 point)
 
 bool Quad::hit (Ray r, HitRecord &record)
 {
-        Vec3 normal = this->v1.cross (-this->v2);
+        Vec3 normal = this->_normal();
 
         /**
                 If the quad is one-sided, then only rays that hit the surface
@@ -42,7 +42,7 @@ bool Quad::hit (Ray r, HitRecord &record)
                 i.e quad is invisible from back side.
          */
         if (this->one_sided ())
-                if (normal.dot (this->v1.cross (this->v2)) > 0)
+                if (r.direction.dot (normal) > 0)
                         return false;
 
         double top = normal.dot (this->location - r.origin);
@@ -71,6 +71,10 @@ bool Quad::hit (Ray r, HitRecord &record)
         return true;
 }
 
+Vec3 Quad::_normal() {
+        return this->v1.cross(this->v2).unit();
+}
+
 Vec3 Quad::tangent (Vec3 _)
 {
         return this->v1;
@@ -78,7 +82,7 @@ Vec3 Quad::tangent (Vec3 _)
 
 Vec3 Quad::normal (Vec3 _)
 {
-        return this->v1.cross (this->v2);
+        return this->_normal();
 }
 
 Vec3 Quad::to_uv (Vec3 point)

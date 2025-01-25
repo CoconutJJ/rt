@@ -4,7 +4,6 @@
 #include "dielectric.hpp"
 #include "image_texture.hpp"
 #include "lambertian.hpp"
-#include "mesh.hpp"
 #include "metal.hpp"
 #include "phong.hpp"
 #include "plane.hpp"
@@ -17,6 +16,7 @@
 #include "utils.hpp"
 #include "vec3.hpp"
 #include "world.hpp"
+
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <thread>
+#include <time.h>
 #include <unistd.h>
 
 Camera::RendererSettings config;
@@ -111,7 +112,6 @@ struct Camera::RendererSettings process_arguments (int argc, char **argv, char *
                 case 'i': {
                         config.use_importance_sampling = true;
                         break;
-
                 }
                 case 'f': filename = optarg; break;
                 case 'w': config.image_width = strtol (optarg, NULL, 10); break;
@@ -198,57 +198,63 @@ int main (int argc, char **argv)
                 log_warn ("Path tracer is enabled, pixel sample count %d < 500. Consider setting sample count >= 500.",
                           config.samples_per_pixel);
 
+        /**
+                Seed random number generation
+         */
+        std::srand (time (NULL));
+
         Camera camera;
         camera.initialize (config);
 
         World world;
         SolidTexture blue (Vec3 (1, 1, 1));
-        Dielectric glass (2.0, 0);
-        BRDF brdf ("brdf/gold-metallic-paint.binary", &blue);
+        Dielectric glass (2.5, 0);
+        BRDF brdf ("brdf/brass.binary", &blue);
         CheckerboardTexture checkers (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
-        ImageTexture earth_texture ("assets/earthmap.jpg");
 
         Lambertian red_diffuse (Vec3 (1, 0.44, 0.45));
         Lambertian green_diffuse (Vec3 (0.42, 0.77, 0.09));
         Lambertian blue_diffuse (Vec3 (0.01, 0.86, 0.91));
         Lambertian white_diffuse (Vec3 (0.8, 0.8, 0.8));
-        Lambertian checkers_diffuse ( &checkers);
-        Lambertian earth_diffuse (&earth_texture);
+        Lambertian checkers_diffuse (&checkers);
         Lambertian light (Vec3 (1, 1, 1));
-        light.emission (Vec3 (3, 3, 3));
+        light.emission (Vec3 (5, 5, 5));
 
         Metal metal (0, Vec3 (0.5, 0.5, 0.5));
-        Metal metal_earth (0, &earth_texture);
 
         Quad left_wall (Vec3 (-1, 0, 0), Vec3 (0, 0, -2), Vec3 (0, 2, 0), &red_diffuse);
         Quad right_wall (Vec3 (1, 2, 0), Vec3 (0, 0, -2), Vec3 (0, -2, 0), &green_diffuse);
-        Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &checkers_diffuse);
+        Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &blue_diffuse);
         Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
         Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &white_diffuse);
-        Quad light_panel (Vec3 (0, 1.98, -1), Vec3 (-0.5, 0, 0), Vec3 (0, 0, -0.5), &light);
+        Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light);
+        Quad front_wall (Vec3 (1, 0, 0), Vec3 (-2, 0, 0), Vec3 (0, 2, 0), &blue_diffuse);
+        front_wall.one_sided () = true;
+        light_panel.one_sided () = true;
 
-        Sphere sp (Vec3 (0, 0.35, -1), 0.25, &brdf);
-        Sphere sp2 (Vec3 (-.5, 0.65, -1.3), 0.25, &glass);
+        Sphere sp (Vec3 (0, 0.35, -1), 0.25, &white_diffuse);
+        Sphere sp2 (Vec3 (0, 0.8, -0.8), 0.5, &glass);
         Sphere sp3 (Vec3 (.5, 0.40, -1.2), 0.25, &glass);
         Sphere sp4 (Vec3 (.5, 1.20, -1.1), 0.25, &glass);
         Sphere sp5 (Vec3 (-.2, 1.1, -.9), 0.25, &glass);
 
-        Mesh mp ("assets/dragon.obj", Vec3 (0, 0.35, -1), 1.0 / 15, &glass);
+        // Mesh mp ("assets/dragon.obj", Vec3 (0, 0.35, -1), 1.0 / 15, &green_diffuse);
 
         world.add (&left_wall);
         world.add (&right_wall);
         world.add (&back_wall);
+        // world.add (&front_wall);
         world.add (&ceiling);
         world.add (&floor);
         world.add (&light_panel);
 
-        // world.add(&mp);
+        // world.add (&mp);
 
-        world.add (&sp);
+        // world.add (&sp);
         world.add (&sp2);
-        world.add (&sp3);
-        world.add (&sp4);
-        world.add (&sp5);
+        // world.add (&sp3);
+        // world.add (&sp4);
+        // world.add (&sp5);
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();

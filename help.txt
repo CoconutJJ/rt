@@ -1,15 +1,18 @@
 usage: rt [ARGUMENTS]
 
 ARGUMENTS:
--f | --out_file             PPM image output file name
--w | --image_width          PPM image width
--r | --aspect_ratio         Aspect ratio of image (default: 16/9, height = width / aspect_ratio)
--v | --vfov                 Vertical Field of View (default: 90, FOV in degrees)
--t | --defocus_angle        Defocus blur lens radius (default: 0.0 - no blur),
--h | --help                 Show this help message
--n | --nthreads             Multithreading (default: OS suggested value)
--a | --arealight_samples    Number of samples for area light (default: 10)
--p | --use_path_tracer      Use path tracer instead of default ray tracer
--d | --max_depth            Max ray bounce depth (default: 5)
--s | --samples_per_pixel    Number of rays cast for each pixel (default: 1000)
--l | --use_light_sampling   Use explicit light sampling 
+-f | --out_file                 PPM image output file name
+-w | --image_width              PPM image width
+-r | --aspect_ratio             Aspect ratio of image (default: 16/9, height = width / aspect_ratio)
+-v | --vfov                     Vertical Field of View (default: 90, FOV in degrees)
+-t | --defocus_angle            Defocus blur lens radius (default: 0.0 - no blur),
+-h | --help                     Show this help message
+-n | --nthreads                 Multithreading (default: OS suggested value)
+-a | --arealight_samples        Number of samples for area light (default: 10)
+-d | --max_depth                Max ray bounce depth (default: 5)
+-s | --samples_per_pixel        Number of rays cast for each pixel (default: 1000)
+-x | --use_scene_sig            Generate Scene Signature (normal shading)
+-p | --use_path_tracer          Use path tracer instead of default ray tracer
+-l | --use_light_sampling       Use explicit light sampling 
+-i | --use_importance_sampling  Use importance sampling
+-b | --background_image         Set background image (default: black)

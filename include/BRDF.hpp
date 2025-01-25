@@ -6,8 +6,6 @@
 class BRDF : public Material {
     public:
 
-        typedef double (*PDF)(double);
-
         BRDF (const char *filename, Texture * texture);
         double *brdf;
         Mat3 sph_basis (double theta, double phi);

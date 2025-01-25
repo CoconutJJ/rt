@@ -204,17 +204,9 @@ Vec3 Vec3::random_hemisphere ()
 
 double Vec3::argument (double y_opp, double x_adj)
 {
-        double y = std::abs (y_opp);
-        double x = std::abs (x_adj);
+        double angle = std::atan2 (y_opp, x_adj);
 
-        if (x_adj > 0 && y_opp >= 0)
-                return std::atan (y / x);
-        else if (x_adj < 0 && y_opp >= 0)
-                return M_PI - std::atan (y / x);
-        else if (x_adj < 0 && y_opp <= 0)
-                return M_PI + std::atan (y / x);
-        else
-                return 2 * M_PI - std::atan (y / x);
+        return angle < 0 ? 2 * M_PI + angle : angle;
 }
 
 Vec3 Vec3::sph ()

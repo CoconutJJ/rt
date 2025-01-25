@@ -24,7 +24,7 @@ Lambertian::Lambertian (Texture *texture)
 inline double Lambertian::pdf (double phi)
 {
         if (!config.use_importance_sampling)
-                return 1 / (2 * M_PI);
+                return 1;
 
         return cos (phi) / M_PI;
 }

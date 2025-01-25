@@ -55,8 +55,8 @@ Mat3 SmoothObject::tbn (Vec3 point)
 Mat3 SmoothObject::tnb (HitRecord &record)
 {
         Vec3 tangent = this->tangent (record.hit_point).unit();
-
-        Mat3 tnb (tangent, record.normal.unit(), record.normal.cross (tangent).unit());
+        Vec3 normal = this->normal(record.hit_point).unit();
+        Mat3 tnb (tangent, normal, normal.cross (tangent).unit());
 
         return tnb;
 }

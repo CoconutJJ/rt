@@ -37,7 +37,7 @@ void World::add_light (Light *light)
 bool World::hit (Ray r, HitRecord &record)
 {
         HitRecord curr_record;
-
+        
         double lambda_min = 0.001;
         double lambda_max = DBL_MAX;
 

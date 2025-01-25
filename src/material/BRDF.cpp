@@ -216,6 +216,7 @@ void lookup_brdf_val (double *brdf,
                 red_val = 0;
                 green_val = 0;
                 blue_val = 0;
+                throw std::logic_error ("Below horizon");
         }
 }
 
@@ -242,7 +243,7 @@ bool read_brdf (const char *filename, double *&brdf)
         return true;
 }
 
-BRDF::BRDF (const char *filename, Texture *texture) : Material(texture, nullptr)
+BRDF::BRDF (const char *filename, Texture *texture) : Material (texture, nullptr)
 {
         if (!read_brdf (filename, this->brdf))
                 throw std::logic_error ("Could not open BRDF file");
@@ -282,6 +283,8 @@ Vec3 BRDF::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
         Vec3 direction = tnb * Vec3::random_hemisphere ();
 
         brdf = this->compute (tnb, r.direction, direction);
+
+        brdf /= record.normal.dot (direction);
 
         return direction;
 }

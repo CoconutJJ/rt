@@ -18,7 +18,9 @@ Vec3 Metal::scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob)
 {
         Vec3 reflect_direction = r.direction.reflect (record.normal).unit () + Vec3::random ().unit () * fuzz;
 
-        brdf = Vec3 (1, 1, 1);
+        double lambert_cos = reflect_direction.unit().dot(record.normal);
+
+        brdf = this->texture->read_texture_uv(record.uv, record.hit_point) / lambert_cos;
         
         ray_prob = 1;
 

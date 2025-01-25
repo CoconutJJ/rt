@@ -20,4 +20,5 @@ class Quad : public SmoothObject {
         
         private:
         bool _one_sided;
+        Vec3 _normal();
 };

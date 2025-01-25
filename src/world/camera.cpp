@@ -14,7 +14,6 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <mutex>
 #include <ostream>
 #include <semaphore>
 #include <sys/ioctl.h>
@@ -73,7 +72,7 @@ void Camera::print_arguments ()
         log_info ("Samples Per Pixel:       %d", this->samples_per_pixel);
         log_info ("Vertical Field of View:  %lf degrees", this->vfov);
         log_info ("Ray Bounce Max Depth:    %d", this->max_depth);
-        log_info ("Defocus Angle:           %d", this->defocus_angle);
+        log_info ("Defocus Angle:           %lf degrees", this->defocus_angle);
         log_info ("Path Tracing:            %s", this->use_path_tracer ? "Enabled" : "Disabled");
         log_info ("Importance Sampling:     %s", this->use_importance_sampling ? "Enabled" : "Disabled");
         log_info ("Explicit Light Sampling: %s", this->use_light_sampling ? "Enabled" : "Disabled");
@@ -389,7 +388,6 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                      << "255"
                      << "\n";
 
-        std::mutex pixel_lock;
         std::counting_semaphore<> sem (max_threads);
         std::counting_semaphore<> progress (0);
         std::vector<std::thread> threads;
@@ -401,13 +399,10 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         for (int j = 0; j < this->image_height; j++) {
                 threads.push_back (std::thread ([&, j] {
                         sem.acquire ();
-                        for (int i = 0; i < this->image_width; i++) {
-                                Vec3 pixel_color = this->sample_pixel (world, i, j);
 
-                                pixel_lock.lock ();
-                                pixels[i + j * image_width] = pixel_color;
-                                pixel_lock.unlock ();
-                        }
+                        for (int i = 0; i < this->image_width; i++)
+                                pixels[i + j * image_width] = this->sample_pixel (world, i, j);
+
                         sem.release ();
                         progress.release ();
                 }));
@@ -449,8 +444,7 @@ void Camera::render (World *world, const char *filename)
         for (int j = 0; j < this->image_height; j++) {
                 bar.update ();
 
-                for (int i = 0; i < this->image_width; i++) {
+                for (int i = 0; i < this->image_width; i++)
                         this->write_color (this->sample_pixel (world, i, j));
-                }
         }
 }
