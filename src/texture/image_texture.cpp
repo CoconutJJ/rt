@@ -33,8 +33,8 @@ Vec3 ImageTexture::read_texture_uv (Vec3 uv, Vec3 point)
 
 Vec3 ImageTexture::read_rgb255 (Vec3 uv)
 {
-        int u = int (std::floor (uv.x * image_width));
-        int v = int (std::floor (uv.y * image_height));
+        int u = int (std::floor (uv[0] * image_width));
+        int v = int (std::floor (uv[1] * image_height));
 
         struct rgb_pixel pixel = this->pixels[v * image_width + u];
 

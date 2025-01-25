@@ -270,7 +270,7 @@ Vec3 BRDF::compute (Mat3 tnb, Vec3 in_direction, Vec3 out_direction)
 
         double r, g, b;
 
-        lookup_brdf_val (this->brdf, in_sph_coords.z, in_sph_coords.y, out_sph_coords.z, out_sph_coords.y, r, g, b);
+        lookup_brdf_val (this->brdf, in_sph_coords[2], in_sph_coords[1], out_sph_coords[2], out_sph_coords[1], r, g, b);
 
         return Vec3 (r, g, b);
 }

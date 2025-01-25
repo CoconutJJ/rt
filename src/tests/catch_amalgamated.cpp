@@ -7818,7 +7818,7 @@ namespace Catch {
 
 // Note: swapping these two includes around causes MSVC to error out
 //       while in /permissive- mode. No, I don't know why.
-//       Tested on VS 2019, 18.{3, 4}.x
+//       Tested on VS 2019, 18.{3, 4}[0]
 
 #include <cstdint>
 #include <iomanip>

@@ -82,7 +82,7 @@ Vec3 Camera::defocus_disk_sample ()
 {
         Vec3 p = random_in_unit_disk ();
 
-        return this->center + this->defocus_disk_u * p.x + this->defocus_disk_v * p.y;
+        return this->center + this->defocus_disk_u * p[0] + this->defocus_disk_v * p[1];
 }
 
 Ray Camera::ray (int du, int dv)
@@ -192,13 +192,13 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
 
 void Camera::write_color (Vec3 color)
 {
-        color.x = std::sqrt (color.x);
-        color.y = std::sqrt (color.y);
-        color.z = std::sqrt (color.z);
+        color.vec[0] = std::sqrt (color[0]);
+        color.vec[1] = std::sqrt (color[1]);
+        color.vec[2] = std::sqrt (color[2]);
         color = color.clamp (0, 0.999);
         color *= 256;
 
-        this->stream << int (color.x) << ' ' << int (color.y) << ' ' << int (color.z) << '\n';
+        this->stream << int (color[0]) << ' ' << int (color[1]) << ' ' << int (color[2]) << '\n';
 }
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)

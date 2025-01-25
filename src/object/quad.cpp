@@ -58,7 +58,7 @@ bool Quad::hit (Ray r, HitRecord &record)
 
         Vec3 uv = this->find_alpha_beta (hit_point);
 
-        bool hit = (0 <= uv.x && uv.x <= 1) && (0 <= uv.y && uv.y <= 1);
+        bool hit = (0 <= uv[0] && uv[0] <= 1) && (0 <= uv[1] && uv[1] <= 1);
 
         if (!hit)
                 return false;

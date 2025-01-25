@@ -1,12 +1,17 @@
 #pragma once
 #include <ostream>
+
+
+#include <simd/simd.h>
+
+
+
 class Vec3 {
     public:
-        double x;
-        double y;
-        double z;
+        simd_double3 vec;
         Vec3 ();
         Vec3 (const Vec3 &other);
+        Vec3 (simd_double3 v);
         Vec3 &operator= (Vec3 other);
         Vec3 (double x, double y, double z);
         Vec3 operator+ (Vec3 a);
@@ -23,7 +28,7 @@ class Vec3 {
         Vec3 operator*= (double d);
         bool operator== (Vec3 b);
         bool operator< (Vec3 b) const;
-        double &operator[] (int dim);
+        // double &operator[] (int dim);
         double operator[] (int index) const;
         double dot (Vec3 b);
         double length_squared ();

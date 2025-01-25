@@ -3,60 +3,69 @@
 #include <cfloat>
 #include <cmath>
 #include <ostream>
+#include <simd/matrix.h>
 #include <stdexcept>
 
-Vec3::Vec3 () : x (0), y (0), z (0)
+#define ACCELERATE_NEW_LAPACK
+#include <simd/geometry.h>
+#include <simd/simd.h>
+#include <simd/vector_make.h>
+#include <vecLib/vecLib.h>
+
+Vec3::Vec3 ()
 {
+        this->vec = simd_make_double3 (0, 0, 0);
+}
+
+Vec3::Vec3 (simd_double3 v)
+{
+        this->vec = v;
 }
 
 Vec3::Vec3 (const Vec3 &other)
 {
-        this->x = other.x;
-        this->y = other.y;
-        this->z = other.z;
+        this->vec = other.vec;
 }
 
-Vec3::Vec3 (double x, double y, double z) : x (x), y (y), z (z)
+Vec3::Vec3 (double x, double y, double z)
 {
-        return;
+        this->vec = simd_make_double3 (x, y, z);
 }
 
 Vec3 &Vec3::operator= (Vec3 other)
 {
-        this->x = other.x;
-        this->y = other.y;
-        this->z = other.z;
+        this->vec = other.vec;
 
         return *this;
 }
 
 std::ostream &operator<< (std::ostream &out, Vec3 v)
 {
-        return out << v.x << ",\t" << v.y << ",\t" << v.z;
+        return out << v[0] << ",\t" << v[1] << ",\t" << v[2];
 }
 
 Vec3 Vec3::operator+ (Vec3 a)
 {
-        return Vec3 (this->x + a.x, this->y + a.y, this->z + a.z);
+        return Vec3 (this->vec + a.vec);
 }
 
 Vec3 Vec3::operator+ (double d)
 {
-        return Vec3 (this->x + d, this->y + d, this->z + d);
+        return Vec3 (this->vec + simd_make_double3 (d, d, d));
 }
 
 Vec3 Vec3::operator- ()
 {
-        return Vec3 (-this->x, -this->y, -this->z);
+        return Vec3 (-this->vec);
 }
 
 Vec3 Vec3::operator- (Vec3 a)
 {
-        return Vec3 (this->x - a.x, this->y - a.y, this->z - a.z);
+        return Vec3 (this->vec - a.vec);
 }
 Vec3 Vec3::operator* (double d)
 {
-        return Vec3 (this->x * d, this->y * d, this->z * d);
+        return Vec3 (d * this->vec);
 }
 
 Vec3 operator* (double scalar, Vec3 a)
@@ -66,12 +75,12 @@ Vec3 operator* (double scalar, Vec3 a)
 
 Vec3 Vec3::operator* (Vec3 b)
 {
-        return Vec3 (this->x * b.x, this->y * b.y, this->z * b.z);
+        return Vec3 (this->vec * b.vec);
 }
 
 Vec3 Vec3::operator/ (double d)
 {
-        return Vec3 (this->x / d, this->y / d, this->z / d);
+        return Vec3 ( this->vec / d);
 }
 
 Vec3 Vec3::operator/= (double d)
@@ -111,7 +120,7 @@ Vec3 Vec3::operator*= (double d)
 
 bool Vec3::operator== (Vec3 b)
 {
-        return (this->x == b.x) && (this->y == b.y) && (this->z == b.z);
+        return simd_equal (this->vec, b.vec);
 }
 
 bool Vec3::operator< (Vec3 b) const
@@ -131,34 +140,33 @@ bool Vec3::operator< (Vec3 b) const
 
 double Vec3::dot (Vec3 b)
 {
-        return std::fma (this->z, b.z, sum_of_products (this->x, b.x, this->y, b.y));
+        return simd_dot (this->vec, b.vec);
 }
 
 Vec3 Vec3::cross (Vec3 b)
 {
-        return Vec3 (difference_of_products (this->y, b.z, this->z, b.y),
-                     difference_of_products (this->z, b.x, this->x, b.z),
-                     difference_of_products (this->x, b.y, this->y, b.x));
+        return Vec3 (simd_cross (this->vec, b.vec));
 }
 
 double Vec3::length_squared ()
 {
-        return this->dot (*this);
+        return simd_length_squared (this->vec);
 }
 
 double Vec3::length ()
 {
-        return std::sqrt (this->length_squared ());
+        return simd_length (this->vec);
 }
 
 Vec3 Vec3::unit ()
 {
-        return *this / this->length ();
+        return Vec3 (simd_normalize (this->vec));
 }
 
 Vec3 Vec3::clamp (double min, double max)
 {
-        return Vec3 (::clamp (min, this->x, max), ::clamp (min, this->y, max), ::clamp (min, this->z, max));
+        return Vec3 (
+                ::clamp (min, this->vec[0], max), ::clamp (min, this->vec[1], max), ::clamp (min, this->vec[2], max));
 }
 
 Vec3 Vec3::random ()
@@ -168,21 +176,22 @@ Vec3 Vec3::random ()
 
 Vec3 Vec3::reflect (Vec3 normal)
 {
-        return *this - normal * (2 * this->dot (normal));
+        return Vec3 (simd_reflect (this->vec, simd_normalize (normal.vec)));
 }
 
 bool Vec3::near_zero ()
 {
-        return std::fabs (this->x) < 1e-8 && std::fabs (this->y) < 1e-8 && std::fabs (this->z) < 1e-8;
+        return std::fabs (this->vec[0]) < 1e-8 && std::fabs (this->vec[1]) < 1e-8 && std::fabs (this->vec[2]) < 1e-8;
 }
 
 Vec3 Vec3::refract (Vec3 n, double mu)
 {
-        Vec3 l = this->unit ();
+        return Vec3 (simd_refract (this->vec, n.vec, mu));
+        // Vec3 l = this->unit ();
 
-        n = -n.unit ();
+        // n = -n.unit ();
 
-        return mu * l + (n * sqrt (1 - mu * mu * (1 - (n.dot (l) * n.dot (l))))) - (mu * (n.dot (l)) * n);
+        // return mu * l + (n * sqrt (1 - mu * mu * (1 - (n.dot (l) * n.dot (l))))) - (mu * (n.dot (l)) * n);
 }
 
 Vec3 Vec3::zero ()
@@ -211,16 +220,16 @@ double Vec3::argument (double y_opp, double x_adj)
 
 Vec3 Vec3::sph ()
 {
-        double theta = this->argument (-this->z, this->x);
+        double theta = this->argument (-this->vec[2], this->vec[0]);
 
-        double phi = std::acos (this->y / this->length ());
+        double phi = std::acos (this->vec[1] / this->length ());
 
         return Vec3 (this->length (), theta, phi);
 }
 
 Vec3 Vec3::sph_inv ()
 {
-        double p = this->x, phi = this->z, theta = this->y;
+        double p = (*this)[0], phi = (*this)[2], theta = (*this)[1];
 
         return Vec3 (p * sin (phi) * cos (theta), p * cos (phi), p * sin (phi) * sin (theta));
 }
@@ -230,23 +239,12 @@ Vec3 Vec3::inf ()
         return Vec3 (DBL_MAX, DBL_MAX, DBL_MAX);
 }
 
-double &Vec3::operator[] (int index)
-{
-        switch (index) {
-        case 0: return this->x;
-        case 1: return this->y;
-        case 2: return this->z;
-        }
-
-        throw std::logic_error ("error: invalid dimension!");
-}
-
 double Vec3::operator[] (int index) const
 {
         switch (index) {
-        case 0: return this->x;
-        case 1: return this->y;
-        case 2: return this->z;
+        case 0: return this->vec[0];
+        case 1: return this->vec[1];
+        case 2: return this->vec[2];
         }
 
         throw std::logic_error ("error: invalid dimension!");

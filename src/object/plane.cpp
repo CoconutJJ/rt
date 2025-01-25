@@ -6,15 +6,15 @@
 #include <stdexcept>
 Vec3 findVectorOnPlane (Vec3 normal, Vec3 point)
 {
-        if (normal.x != 0)
+        if (normal[0] != 0)
                 return Vec3 (
-                        (normal.y * (1 - point.y) + normal.z * (1 - point.z)) / -point.x, 1 - point.y, 1 - point.z);
-        else if (normal.y != 0)
+                        (normal[1] * (1 - point[1]) + normal[2] * (1 - point[2])) / -point[0], 1 - point[1], 1 - point[2]);
+        else if (normal[1] != 0)
                 return Vec3 (
-                        1 - point.x, (normal.x * (1 - point.x) + normal.z * (1 - point.z)) / -point.y, 1 - point.z);
-        else if (normal.z != 0)
+                        1 - point[0], (normal[0] * (1 - point[0]) + normal[2] * (1 - point[2])) / -point[1], 1 - point[2]);
+        else if (normal[2] != 0)
                 return Vec3 (
-                        1 - point.x, 1 - point.y, (normal.x * (1 - point.x) + normal.y * (1 - point.y)) / -point.z);
+                        1 - point[0], 1 - point[1], (normal[0] * (1 - point[0]) + normal[1] * (1 - point[1])) / -point[2]);
         else
                 return Vec3 (0, 0, 0);
 }

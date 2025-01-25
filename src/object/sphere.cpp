@@ -47,7 +47,7 @@ Vec3 Sphere::tangent (Vec3 point)
 {
         Vec3 sphere_coord = (point - location).sph ();
 
-        return this->tangent (sphere_coord.y, sphere_coord.z);
+        return this->tangent (sphere_coord[1], sphere_coord[2]);
 }
 
 Vec3 Sphere::normal (Vec3 point)
@@ -92,8 +92,8 @@ Vec3 Sphere::to_uv (Vec3 point)
 {
         Vec3 sphere_coord = point.sph ();
 
-        double theta = sphere_coord.y;
-        double phi = sphere_coord.z;
+        double theta = sphere_coord[1];
+        double phi = sphere_coord[2];
 
         double v = phi / M_PI;
 

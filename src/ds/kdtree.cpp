@@ -2,14 +2,11 @@
 #include "hitrecord.hpp"
 #include "ray.hpp"
 #include "triangle.hpp"
-#include "utils.hpp"
 #include "vec3.hpp"
 #include <algorithm>
-#include <cassert>
 #include <cfloat>
 #include <cstddef>
 #include <cstdlib>
-#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -51,8 +48,8 @@ KDTree::BoundingBox KDTree::_compute_bounding_box (std::vector<Vec3> points)
 
         for (Vec3 &vertex : points) {
                 for (int i = 0; i < 3; i++) {
-                        box.min[i] = std::min (box.min[i], vertex[i]);
-                        box.max[i] = std::max (box.max[i], vertex[i]);
+                        box.min.vec[i] = std::min (box.min[i], vertex[i]);
+                        box.max.vec[i] = std::max (box.max[i], vertex[i]);
                 }
         }
 
@@ -78,8 +75,8 @@ std::pair<KDTree::BoundingBox, KDTree::BoundingBox> KDTree::BoundingBox::split (
         BoundingBox left = *this;
         BoundingBox right = *this;
 
-        left.max[axis] = value;
-        right.min[axis] = value;
+        left.max.vec[axis] = value;
+        right.min.vec[axis] = value;
 
         return std::make_pair (left, right);
 }
