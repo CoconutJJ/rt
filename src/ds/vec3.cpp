@@ -80,7 +80,7 @@ Vec3 Vec3::operator* (Vec3 b)
 
 Vec3 Vec3::operator/ (double d)
 {
-        return Vec3 ( this->vec / d);
+        return Vec3 (this->vec / d);
 }
 
 Vec3 Vec3::operator/= (double d)
@@ -187,11 +187,6 @@ bool Vec3::near_zero ()
 Vec3 Vec3::refract (Vec3 n, double mu)
 {
         return Vec3 (simd_refract (this->vec, n.vec, mu));
-        // Vec3 l = this->unit ();
-
-        // n = -n.unit ();
-
-        // return mu * l + (n * sqrt (1 - mu * mu * (1 - (n.dot (l) * n.dot (l))))) - (mu * (n.dot (l)) * n);
 }
 
 Vec3 Vec3::zero ()
@@ -229,7 +224,7 @@ Vec3 Vec3::sph ()
 
 Vec3 Vec3::sph_inv ()
 {
-        double p = (*this)[0], phi = (*this)[2], theta = (*this)[1];
+        double p = this->vec[0], phi = this->vec[2], theta = this->vec[1];
 
         return Vec3 (p * sin (phi) * cos (theta), p * cos (phi), p * sin (phi) * sin (theta));
 }
@@ -241,11 +236,8 @@ Vec3 Vec3::inf ()
 
 double Vec3::operator[] (int index) const
 {
-        switch (index) {
-        case 0: return this->vec[0];
-        case 1: return this->vec[1];
-        case 2: return this->vec[2];
-        }
+        if (index < 0 || index > 2)
+                throw std::logic_error ("error: invalid dimension!");
 
-        throw std::logic_error ("error: invalid dimension!");
+        return this->vec[index];
 }

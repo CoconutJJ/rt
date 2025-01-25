@@ -30,7 +30,7 @@ Mat3 &Mat3::operator= (Mat3 other)
 
 Vec3 Mat3::operator* (Vec3 b)
 {
-        return Vec3 (simd_mul (b.vec, this->mat));
+        return Vec3 (simd_mul (this->mat, b.vec));
 }
 
 Mat3 Mat3::operator* (Mat3 B)
