@@ -9,9 +9,14 @@
 #include "vec3.hpp"
 #include "world.hpp"
 #include <algorithm>
+#include <cerrno>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -190,15 +195,33 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
         return color.clamp (0, 1);
 }
 
-void Camera::write_color (Vec3 color)
+void Camera::export_p6 (const char *filename, std::vector<Vec3> pixels)
 {
-        color.vec[0] = std::sqrt (color[0]);
-        color.vec[1] = std::sqrt (color[1]);
-        color.vec[2] = std::sqrt (color[2]);
-        color = color.clamp (0, 0.999);
-        color *= 256;
+        FILE *fp = fopen (filename, "wb");
 
-        this->stream << int (color[0]) << ' ' << int (color[1]) << ' ' << int (color[2]) << '\n';
+        if (!fp) {
+                log_error ("Failed to write image file %s: %s", filename, strerror (errno));
+                exit (EXIT_FAILURE);
+        }
+
+        size_t pixel_data_size = pixels.size () * 3 * sizeof (uint8_t);
+        uint8_t *pixel_data = (uint8_t *)malloc (pixel_data_size);
+        size_t j = 0;
+
+        for (Vec3 &p : pixels)
+                for (int i = 0; i < 3; i++)
+                        pixel_data[j++] = uint8_t (clamp (0, sqrt (p[i]), 0.999) * 256);
+
+        fprintf (fp,
+                 "P6\n"
+                 "%d %d\n"
+                 "%d\n",
+                 this->image_width,
+                 this->image_height,
+                 255);
+        fwrite (pixel_data, pixel_data_size, 1, fp);
+        fclose (fp);
+        free (pixel_data);
 }
 
 Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_light)
@@ -347,18 +370,6 @@ Vec3 Camera::scene_signature_color (Ray starting_ray, World *world)
         return (record.normal.unit () + Vec3 (1, 1, 1)) / 2;
 }
 
-void Camera::set_output_file (const char *filename)
-{
-        std::ofstream file_stream = std::ofstream (std::string (filename));
-
-        this->stream.rdbuf (file_stream.rdbuf ());
-
-        this->stream << "P3\n"
-                     << this->image_width << ' ' << this->image_height << "\n"
-                     << "255"
-                     << "\n";
-}
-
 Vec3 Camera::sample_pixel (World *world, int i, int j)
 {
         Vec3 pixel_color (0, 0, 0);
@@ -380,14 +391,6 @@ Vec3 Camera::sample_pixel (World *world, int i, int j)
 
 void Camera::render_multithreaded (World *world, const char *filename, int max_threads)
 {
-        std::ofstream *file_stream = new std::ofstream (std::string (filename));
-        this->stream.rdbuf (file_stream->rdbuf ());
-
-        this->stream << "P3\n"
-                     << this->image_width << ' ' << this->image_height << "\n"
-                     << "255"
-                     << "\n";
-
         std::counting_semaphore<> sem (max_threads);
         std::counting_semaphore<> progress (0);
         std::vector<std::thread> threads;
@@ -424,8 +427,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
 
         int time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
 
-        for (Vec3 &pixel_color : pixels)
-                this->write_color (pixel_color);
+        this->export_p6 (filename, pixels);
 
         std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
 }
@@ -441,10 +443,14 @@ void Camera::render (World *world, const char *filename)
                      << "\n";
         progressbar bar (image_height);
 
+        std::vector<Vec3> pixels;
+
         for (int j = 0; j < this->image_height; j++) {
                 bar.update ();
 
                 for (int i = 0; i < this->image_width; i++)
-                        this->write_color (this->sample_pixel (world, i, j));
+                        pixels.push_back (this->sample_pixel (world, i, j));
         }
+
+        this->export_p6 (filename, pixels);
 }

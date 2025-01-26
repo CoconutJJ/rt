@@ -7,6 +7,7 @@
 #include "world.hpp"
 #include <iostream>
 #include <ostream>
+#include <vector>
 
 class Camera {
     public:
@@ -33,17 +34,17 @@ class Camera {
         void initialize (struct RendererSettings settings);
         void render (World *world, const char *filename);
         void render_multithreaded (World *world, const char *filename, int max_threads);
-        void set_output_file (const char *filename);
         Ray ray (int i, int j);
         Vec3 ray_color (Ray r, World *world, int depth);
         Vec3 single_path_color (Ray starting_ray, World *world, int max_depth);
         Vec3 scene_signature_color (Ray starting_ray, World *world);
         Vec3 sample_pixel (World *world, int i, int j);
-        void write_color (Vec3 color);
         Vec3 sample_light_rays (World *world, HitRecord &record, Light *light, Material::PhongParams params, int K);
         Vec3 sample_light (World *world, HitRecord &record, SmoothObject *&hit_light);
         Vec3 defocus_disk_sample ();
-        void print_arguments();
+        void print_arguments ();
+        void export_p6 (const char *filename, std::vector<Vec3> pixels);
+
     private:
         int image_width;
         int image_height;

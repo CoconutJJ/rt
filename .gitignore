@@ -1,6 +1,7 @@
 *.dSYM/
 *.ppm
 *.gch
+*.png
 .DS_Store
 rt
 a.out

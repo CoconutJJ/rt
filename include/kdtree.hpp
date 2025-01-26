@@ -23,9 +23,9 @@ class KDTree {
                 bool inside (Vec3 point);
                 bool inside (Triangle *triangle);
                 std::pair<BoundingBox, BoundingBox> split (int axis, double value);
-                std::pair<double, double> _one_dim_ray_intersection(Ray r, int axis, bool &reversed);
+                std::pair<double, double> _one_dim_ray_intersection (Ray r, int axis, bool &reversed);
                 int longest_dim ();
-                bool is_reversed(Ray r, int axis);
+                bool is_reversed (Ray r, int axis);
         };
 
         struct KDTreeNode {

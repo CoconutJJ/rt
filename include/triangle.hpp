@@ -23,15 +23,14 @@ class Triangle : public SmoothObject {
         bool inside (Vec3 point);
         bool hit (Ray r, HitRecord &record) override;
         void center (Vec3 point);
-        Vec3 center();
+        Vec3 center ();
         Vec3 to_uv (Vec3 point) override;
         Vec3 tangent (Vec3 point) override;
         Vec3 normal (Vec3 point) override;
         double area () override;
         Vec3 sample_point () override;
-        Triangle* translate(Vec3 v);
-        Triangle* scale(double s);
-
+        Triangle *translate (Vec3 v);
+        Triangle *scale (double s);
 
     private:
         Vec3 _u ();

@@ -3,7 +3,6 @@
 #include "smooth_object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
-#include <algorithm>
 
 QuadLight::QuadLight (Quad *quad) : Light ((SmoothObject *)quad), quad (quad)
 {

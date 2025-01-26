@@ -218,7 +218,7 @@ int main (int argc, char **argv)
         Lambertian white_diffuse (Vec3 (0.8, 0.8, 0.8));
         Lambertian checkers_diffuse (&checkers);
         Lambertian light (Vec3 (1, 1, 1));
-        light.emission (Vec3 (5, 5, 5));
+        light.emission (Vec3 (1, 1, 1));
 
         Metal metal (0, Vec3 (0.5, 0.5, 0.5));
 
@@ -251,10 +251,10 @@ int main (int argc, char **argv)
         // world.add (&mp);
 
         // world.add (&sp);
-        world.add (&sp2);
-        // world.add (&sp3);
-        // world.add (&sp4);
-        // world.add (&sp5);
+        // world.add (&sp2);
+        world.add (&sp3);
+        world.add (&sp4);
+        world.add (&sp5);
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();

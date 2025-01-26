@@ -37,8 +37,7 @@ class Mesh : public Object {
         bool is_light_source () override;
         bool hit (Ray r, HitRecord &record) override;
 
-
     private:
         void _load_mesh ();
-        Vec3 _transform_vertex(Vec3 v);
+        Vec3 _transform_vertex (Vec3 v);
 };

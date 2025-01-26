@@ -1,10 +1,7 @@
 #pragma once
 #include <ostream>
 
-
 #include <simd/simd.h>
-
-
 
 class Vec3 {
     public:

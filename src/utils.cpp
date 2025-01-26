@@ -6,9 +6,6 @@
 #include "triangle.hpp"
 #include "vec3.hpp"
 
-#include "lib/rply.h"
-#include "lib/rplyfile.h"
-
 #include <cstdarg>
 #include <cstddef>
 #include <cstdio>

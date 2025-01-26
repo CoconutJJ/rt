@@ -1,6 +1,5 @@
 #include "hitrecord.hpp"
 #include "vec3.hpp"
-#include <iostream>
 
 HitRecord::HitRecord () : hit_point (0, 0, 0), normal (0, 0, 0)
 {
