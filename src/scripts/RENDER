@@ -4,7 +4,7 @@
         --image_width=750 \
         --aspect_ratio=1/1 \
         --vfov=60 \
-        --samples_per_pixel=20 \
+        --samples_per_pixel=500 \
         --use_path_tracer \
         --use_light_sampling  \
         --background_image=./assets/pano2.jpg \

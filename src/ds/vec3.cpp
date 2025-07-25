@@ -2,8 +2,11 @@
 #include "utils.hpp"
 #include <cfloat>
 #include <cmath>
+#include <math.h>
 #include <ostream>
+#include <simd/common.h>
 #include <simd/matrix.h>
+#include <simd/vector_types.h>
 #include <stdexcept>
 
 #define ACCELERATE_NEW_LAPACK

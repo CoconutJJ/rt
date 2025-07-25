@@ -46,12 +46,11 @@ KDTree::BoundingBox KDTree::_compute_bounding_box (std::vector<Vec3> points)
 {
         BoundingBox box (points[0], points[0]);
 
-        for (Vec3 &vertex : points) {
+        for (Vec3 &vertex : points)
                 for (int i = 0; i < 3; i++) {
                         box.min.vec[i] = std::min (box.min[i], vertex[i]);
                         box.max.vec[i] = std::max (box.max[i], vertex[i]);
                 }
-        }
 
         return box;
 }
@@ -105,11 +104,6 @@ int KDTree::BoundingBox::longest_dim ()
 
 std::pair<double, double> KDTree::BoundingBox::_one_dim_ray_intersection (Ray r, int axis, bool &reversed)
 {
-        // if (r.direction[axis] == 0) {
-        //         reversed = false;
-        //         return std::make_pair (-DBL_MAX, DBL_MAX);
-        // }
-
         double min = this->min[axis], max = this->max[axis];
 
         reversed = r.direction[axis] < 0;

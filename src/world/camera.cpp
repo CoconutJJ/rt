@@ -19,11 +19,12 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <ostream>
 #include <semaphore>
+#include <string>
 #include <sys/ioctl.h>
 #include <thread>
-#include <unistd.h>
 #include <vector>
 
 Camera::Camera () : stream (std::cout), pixel_du (0, 0, 0), pixel_dv (0, 0, 0), pixel_00 (0, 0, 0), center (0, 0, 0)

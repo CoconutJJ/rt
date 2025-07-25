@@ -10,8 +10,8 @@ project(rt CXX C)
 include_directories(include)
 
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native -mtune=native -fuse-ld=lld -framework Accelerate")
+# set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++20 -march=native -mtune=native -fuse-ld=lld -framework Accelerate")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math -flto")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
@@ -39,7 +39,7 @@ add_executable(height_map_conv "src/scripts/bin/height_map.cpp" "src/utils.cpp")
 add_executable(obj_file "src/scripts/bin/obj_file.cpp" "src/utils.cpp")
 
 target_link_libraries(rt ds world texture object material light io utils rply)
-target_link_libraries(height_map_conv ds)
+target_link_libraries(height_map_conv ds object world)
 target_link_libraries(obj_file ds io)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")

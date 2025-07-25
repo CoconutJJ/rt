@@ -1,4 +1,7 @@
 #include "object.hpp"
+#include "material.hpp"
+#include "ray.hpp"
+#include "vec3.hpp"
 Object::Object ()
 {
 }

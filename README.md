@@ -110,6 +110,10 @@ Glass and metal reflections and the whole lot!
 
 <img src="static/iter7.png" width=500/>
 
+Okay, Glass actually looks like glass instead of plastic
+
+<img src="static/iter8.png" width=500/>
+
 
 ## Credits
 - Matusik, W., Pfister, H., Brand, M., & McMillan, L. (2003). A Data-Driven Reflectance Model. ACM Transactions on Graphics, 22(3), 759–769. 

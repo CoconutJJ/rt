@@ -1,6 +1,7 @@
 #include "plane.hpp"
 #include "hitrecord.hpp"
 #include "material.hpp"
+#include "ray.hpp"
 #include "smooth_object.hpp"
 #include "vec3.hpp"
 #include <stdexcept>

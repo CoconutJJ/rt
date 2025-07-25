@@ -11,7 +11,6 @@
 #include "vec3.hpp"
 
 #include <iostream>
-#include <stdexcept>
 #include <vector>
 
 Mesh::Mesh (const char *obj_filename, Vec3 location, double scale, Material *material)

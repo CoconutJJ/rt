@@ -105,5 +105,7 @@ World SceneParser::parse (const char *filename)
         World world;
 
         for (auto &obj : scene) {
+        
+                
         }
 }
