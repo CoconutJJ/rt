@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "dielectric.hpp"
 #include "hitrecord.hpp"
 #include "lambertian.hpp"
 #include "light.hpp"
@@ -82,6 +83,7 @@ void Camera::print_arguments ()
         log_info ("Path Tracing:            %s", this->use_path_tracer ? "Enabled" : "Disabled");
         log_info ("Importance Sampling:     %s", this->use_importance_sampling ? "Enabled" : "Disabled");
         log_info ("Explicit Light Sampling: %s", this->use_light_sampling ? "Enabled" : "Disabled");
+        // log_info ("Compiler Optimization Level: %d", __OPTIMIZE__);
 }
 
 Vec3 Camera::defocus_disk_sample ()
@@ -161,8 +163,13 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
 {
         HitRecord record;
 
-        if (!world->hit (r, record))
-                return Vec3 (0, 0, 0);
+        if (!world->hit (r, record)) {
+                Vec3 sph = r.direction.unit ().sph ();
+
+                Vec3 uv (sph[1] / (2 * M_PI), sph[2] / M_PI, 0);
+
+                return this->background_texture->read_texture_uv (uv, uv).clamp (0, 1);
+        }
 
         if (depth == 0)
                 return record.object->material->texture->read_texture_uv (record.uv, record.hit_point);
@@ -174,7 +181,7 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
         for (Light *light_source : world->lights)
                 color += this->sample_light_rays (world, record, light_source, params, this->arealight_samples);
 
-        color += world->photon_map_color (record.hit_point) * 1.5;
+        // color += world->photon_map_color (record.hit_point) * 1.5;
         color *= params.gamma;
 
         Vec3 normal = record.normal;
@@ -182,17 +189,30 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
         if (params.gamma < 1) {
                 // mu is the refractive index:
                 // air has a refractive index of 1.
-                double mu = record.front_face ? params.mu : 1 / params.mu;
+                double mu = record.front_face ? 1 / params.mu : params.mu;
 
                 if (r.can_refract (normal, mu)) {
-                        Ray refraction (record.hit_point, r.direction.unit ().refract (normal, mu));
-                        color += this->ray_color (refraction, world, depth - 1) * (1 - params.gamma);
+                        double refl = Dielectric::reflectance ((-(r.direction.unit ())).dot (normal), mu);
+                        if (random_double (0, 1) < refl) {
+                                Ray reflected_ray (record.hit_point, r.direction.reflect (normal).unit ());
+                                reflected_ray.nudge_forward();
+                                color += this->ray_color (reflected_ray, world, depth - 1) * params.rg;
+                        } else {
+                                Ray refraction (record.hit_point, r.direction.unit ().refract (normal, mu));
+                                refraction.nudge_forward ();
+                                color += this->ray_color (refraction, world, depth - 1) * (1 - params.gamma);
+                        }
+                } else {
+                        Ray reflected_ray (record.hit_point, r.direction.reflect (normal).unit ());
+                        color += this->ray_color (reflected_ray, world, depth - 1) * params.rg;
                 }
+        } else {
+                Ray specular_reflection (record.hit_point, r.direction.unit ().reflect (normal).unit ());
+
+                specular_reflection.nudge_forward ();
+
+                color += this->ray_color (specular_reflection, world, depth - 1) * params.rg;
         }
-
-        Ray specular_reflection (record.hit_point, r.direction.unit ().reflect (normal).unit ());
-        color += this->ray_color (specular_reflection, world, depth - 1) * params.rg;
-
         return color.clamp (0, 1);
 }
 
@@ -397,9 +417,14 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         std::vector<std::thread> threads;
         std::vector<Vec3> pixels (this->image_width * this->image_height);
 
+#ifndef __OPTIMIZE__
+        log_warn ("You are running a DEBUG build. Rendering may be slower than expected.");
+#endif
+
         log_info ("Rendering on %d threads with the following arguments:", max_threads);
         this->print_arguments ();
 
+        // #ifdef THOROTTLED_PARALLEL
         for (int j = 0; j < this->image_height; j++) {
                 threads.push_back (std::thread ([&, j] {
                         sem.acquire ();
@@ -411,6 +436,22 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                         progress.release ();
                 }));
         }
+        // #else
+        //         for (int tid = 0; tid < max_threads; tid++) {
+        //                 threads.push_back (std::thread ([&, tid] {
+        //                         for (int j = 0; j < this->image_height; j++) {
+        //                                 sem.acquire ();
+
+        //                                 for (int i = 0; i < this->image_width; i++)
+        //                                         pixels[i + j * image_width] = this->sample_pixel (world, i, j);
+
+        //                                 sem.release ();
+        //                                 progress.release ();
+        //                         }
+        //                 }));
+        //         }
+        // #endif
+
         progressbar bar (image_height);
 
         auto start_time = std::chrono::high_resolution_clock::now ();

@@ -21,6 +21,13 @@ Lambertian::Lambertian (Texture *texture)
 {
 }
 
+Lambertian::PhongParams Lambertian::phong(Ray r, HitRecord &record){
+        return Lambertian::PhongParams {
+                .ra = 0,
+                
+        };
+}
+
 inline double Lambertian::pdf (double phi)
 {
         if (!config.use_importance_sampling)

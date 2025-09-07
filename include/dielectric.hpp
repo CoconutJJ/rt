@@ -7,6 +7,6 @@ class Dielectric : public Material {
         ~Dielectric ();
         Vec3 scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob) override;
 
-        double reflectance (double cosine, double refraction_index);
+        static double reflectance (double cosine, double refraction_index);
         double refraction_index, absorption;
 };

@@ -7,10 +7,10 @@
 
 class Phong : public Material {
     public:
-        Phong (double rs,
-               double rd,
-               double ra,
-               double rg,
+        Phong (double rs, // specular reflection coefficient
+               double rd, // diffuse reflection coefficient
+               double ra, // ambient reflection coefficient
+               double rg, // secondary reflection coeficient
                double shininess,
                double gamma,
                double mu,

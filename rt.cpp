@@ -1,4 +1,4 @@
-#include "BRDF.hpp"
+#include "MERNBRDF.hpp"
 #include "camera.hpp"
 #include "checkerboard.hpp"
 #include "dielectric.hpp"
@@ -34,37 +34,6 @@ void usage ()
         fprintf (stderr, "%s", help_txt);
 }
 
-World ray_trace_scene ()
-{
-        World world;
-        PointLight light (Vec3 (0, 1, -1), Vec3 (1, 1, 1), Vec3 (1, 1, 1));
-
-        SolidTexture white (Vec3 (1, 1, 1));
-        SolidTexture blue (Vec3 (0.01, 0.01, 1));
-
-        Phong background (1, 0.5, 1, 0.01, 0, 1, 0, &blue);
-        Phong glass (2, 0.5, 1, 0.03, 100, 0, 0.01, &white);
-
-        Plane backdrop (Vec3 (0, 0, -5), Vec3 (0, 0, 1), &background);
-
-        SolidTexture light_t (Vec3 (0.5, 0.5, 0.5));
-        Phong light_panel_mat (1, 1, 1, 0, 0, 1, 0, &light_t);
-        Quad light_panel (Vec3 (-0.5, 3, -2), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light_panel_mat);
-        QuadLight q (&light_panel);
-
-        CheckerboardTexture checkers (Vec3 (0.01, 0.01, 0.01), Vec3 (1, 1, 1));
-        Phong floor_material (0.2, 0.6, 0.3, 0.3, 0, 1, 0, &checkers);
-        Sphere planet (Vec3 (0, -100.5, 0), 100, &floor_material);
-
-        Sphere obj (Vec3 (0, 0.5, -2), 0.5, &glass);
-
-        world.add (&obj);
-        world.add (&planet);
-        world.add_light (&q);
-        world.add (&light_panel);
-
-        return world;
-}
 
 struct Camera::RendererSettings process_arguments (int argc, char **argv, char *&filename, int &nthreads)
 {
@@ -207,54 +176,84 @@ int main (int argc, char **argv)
         camera.initialize (config);
 
         World world;
-        SolidTexture blue (Vec3 (1, 1, 1));
-        Dielectric glass (2.5, 0);
-        BRDF brdf ("brdf/brass.binary", &blue);
-        CheckerboardTexture checkers (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
+        PointLight light (Vec3 (0, 1, -1), Vec3 (1, 1, 1), Vec3 (1, 1, 1));
 
-        Lambertian red_diffuse (Vec3 (1, 0.44, 0.45));
-        Lambertian green_diffuse (Vec3 (0.42, 0.77, 0.09));
-        Lambertian blue_diffuse (Vec3 (0.01, 0.86, 0.91));
-        Lambertian white_diffuse (Vec3 (0.8, 0.8, 0.8));
-        Lambertian checkers_diffuse (&checkers);
-        Lambertian light (Vec3 (1, 1, 1));
-        light.emission (Vec3 (1, 1, 1));
+        SolidTexture white (Vec3 (1, 1, 1));
+        SolidTexture blue (Vec3 (0.01, 0.01, 1));
 
-        Metal metal (0, Vec3 (0.5, 0.5, 0.5));
+        Phong background (1, 0.5, 1, 0.01, 0, 1, 0, &blue);
+        Phong glass (2, 0.5, 1, 0.5, 100, 0, 2, &white);
 
-        Quad left_wall (Vec3 (-1, 0, 0), Vec3 (0, 0, -2), Vec3 (0, 2, 0), &red_diffuse);
-        Quad right_wall (Vec3 (1, 2, 0), Vec3 (0, 0, -2), Vec3 (0, -2, 0), &green_diffuse);
-        Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &blue_diffuse);
-        Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
-        Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &white_diffuse);
-        Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light);
-        Quad front_wall (Vec3 (1, 0, 0), Vec3 (-2, 0, 0), Vec3 (0, 2, 0), &blue_diffuse);
-        front_wall.one_sided () = true;
-        light_panel.one_sided () = true;
+        Plane backdrop (Vec3 (0, 0, -5), Vec3 (0, 0, 1), &background);
 
-        Sphere sp (Vec3 (0, 0.35, -1), 0.25, &white_diffuse);
-        Sphere sp2 (Vec3 (0, 0.8, -0.8), 0.5, &glass);
-        Sphere sp3 (Vec3 (.5, 0.40, -1.2), 0.25, &glass);
-        Sphere sp4 (Vec3 (.5, 1.20, -1.1), 0.25, &glass);
-        Sphere sp5 (Vec3 (-.2, 1.1, -.9), 0.25, &glass);
+        SolidTexture light_t (Vec3 (0.5, 0.5, 0.5));
+        Phong light_panel_mat (1, 1, 1, 0, 0, 1, 0, &light_t);
+        Quad light_panel (Vec3 (-0.5, 3, -2), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light_panel_mat);
+        QuadLight q (&light_panel);
 
-        // Mesh mp ("assets/dragon.obj", Vec3 (0, 0.35, -1), 1.0 / 15, &green_diffuse);
+        CheckerboardTexture checkers (Vec3 (0.01, 0.01, 0.01), Vec3 (1, 1, 1));
+        Phong floor_material (0.2, 0.6, 0.3, 0.3, 0, 1, 0, &checkers);
+        Sphere planet (Vec3 (0, -100.5, 0), 100, &floor_material);
 
-        world.add (&left_wall);
-        world.add (&right_wall);
-        world.add (&back_wall);
-        // world.add (&front_wall);
-        world.add (&ceiling);
-        world.add (&floor);
+        Sphere obj (Vec3 (0, 0.5, -2), 0.5, &glass);
+
+        world.add (&obj);
+        world.add (&planet);
+        world.add_light (&q);
         world.add (&light_panel);
 
-        // world.add (&mp);
 
-        // world.add (&sp);
-        // world.add (&sp2);
-        world.add (&sp3);
-        world.add (&sp4);
-        world.add (&sp5);
+
+        // ====== Path Tracing Scene ==========
+
+        // SolidTexture blue (Vec3 (1, 1, 1));
+        // Dielectric glass (2.5, 0);
+        // BRDF brdf ("brdf/brass.binary", &blue);
+        // CheckerboardTexture checkers (Vec3 (0, 0, 0), Vec3 (1, 1, 1));
+
+        // Lambertian red_diffuse (Vec3 (1, 0.44, 0.45));
+        // Lambertian green_diffuse (Vec3 (0.42, 0.77, 0.09));
+        // Lambertian blue_diffuse (Vec3 (0.01, 0.86, 0.91));
+        // Lambertian white_diffuse (Vec3 (0.8, 0.8, 0.8));
+        // Lambertian checkers_diffuse (&checkers);
+        // Lambertian light (Vec3 (1, 1, 1));
+        // light.emission (Vec3 (1, 1, 1));
+
+        // Metal metal (0, Vec3 (0.5, 0.5, 0.5));
+
+        // Quad left_wall (Vec3 (-1, 0, 0), Vec3 (0, 0, -2), Vec3 (0, 2, 0), &red_diffuse);
+        // Quad right_wall (Vec3 (1, 2, 0), Vec3 (0, 0, -2), Vec3 (0, -2, 0), &green_diffuse);
+        // Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &blue_diffuse);
+        // Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
+        // Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &white_diffuse);
+        // Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-1, 0, 0), Vec3 (0, 0, -1), &light);
+        // Quad front_wall (Vec3 (1, 0, 0), Vec3 (-2, 0, 0), Vec3 (0, 2, 0), &blue_diffuse);
+        // front_wall.one_sided () = true;
+        // light_panel.one_sided () = true;
+
+        // Sphere sp (Vec3 (0, 0.35, -1), 0.25, &white_diffuse);
+        // Sphere sp2 (Vec3 (0, 0.8, -0.8), 0.5, &glass);
+        // Sphere sp3 (Vec3 (.5, 0.40, -1.2), 0.25, &glass);
+        // Sphere sp4 (Vec3 (.5, 1.20, -1.1), 0.25, &glass);
+        // Sphere sp5 (Vec3 (-.2, 1.1, -.9), 0.25, &glass);
+
+        // // Mesh mp ("assets/dragon.obj", Vec3 (0, 0.35, -1), 1.0 / 15, &green_diffuse);
+
+        // world.add (&left_wall);
+        // world.add (&right_wall);
+        // world.add (&back_wall);
+        // // world.add (&front_wall);
+        // world.add (&ceiling);
+        // world.add (&floor);
+        // world.add (&light_panel);
+
+        // // world.add (&mp);
+
+        // // world.add (&sp);
+        // // world.add (&sp2);
+        // world.add (&sp3);
+        // world.add (&sp4);
+        // world.add (&sp5);
 
         if (nthreads < 0)
                 nthreads = std::thread::hardware_concurrency ();
