@@ -11,6 +11,7 @@ class Lambertian : public Material {
 
         Vec3 scatter (Ray r, HitRecord &record, Vec3 &brdf, double &ray_prob) override;
         PhongParams phong (Ray r, HitRecord &record) override;
+
     private:
         Vec3 sample_direction (HitRecord &record, double &phi);
         double pdf (double phi);

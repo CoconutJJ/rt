@@ -1,18 +1,34 @@
 #pragma once
 
 #include "vec3.hpp"
+
+#ifdef __APPLE__
+#define USE_ACCELERATE
+#endif
+
+#ifdef USE_ACCELERATE
 #include <simd/simd.h>
 #include <simd/types.h>
+#endif
 
 class Mat3 {
     public:
         Vec3 c1, c2, c3;
+
+#ifdef USE_ACCELERATE
         simd_double3x3 mat;
+#endif
+
         Mat3 ();
         Mat3 (const Mat3 &other);
         Mat3 &operator= (Mat3 other);
+
+#ifdef USE_ACCELERATE
         Mat3 (simd_double3x3 mat);
+#endif
+
         Mat3 (Vec3 c1, Vec3 c2, Vec3 c3);
+
         Mat3 transpose ();
         Vec3 operator* (Vec3 x);
         Mat3 operator* (double d);

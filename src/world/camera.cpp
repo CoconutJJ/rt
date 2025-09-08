@@ -48,7 +48,7 @@ void Camera::initialize (struct RendererSettings settings)
         this->use_importance_sampling = settings.use_importance_sampling;
 
         this->lookat = Vec3 (0, 1, -1);
-        this->center = Vec3 (0, 1, 1); // (1, 1, 4)
+        this->center = Vec3 (0, 1, 2); // (1, 1, 4)
         this->focus_dist = 1;
 
         this->image_height = int (this->image_width / this->aspect_ratio);
@@ -195,7 +195,7 @@ Vec3 Camera::ray_color (Ray r, World *world, int depth)
                         double refl = Dielectric::reflectance ((-(r.direction.unit ())).dot (normal), mu);
                         if (random_double (0, 1) < refl) {
                                 Ray reflected_ray (record.hit_point, r.direction.reflect (normal).unit ());
-                                reflected_ray.nudge_forward();
+                                reflected_ray.nudge_forward ();
                                 color += this->ray_color (reflected_ray, world, depth - 1) * params.rg;
                         } else {
                                 Ray refraction (record.hit_point, r.direction.unit ().refract (normal, mu));
@@ -421,10 +421,16 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
         log_warn ("You are running a DEBUG build. Rendering may be slower than expected.");
 #endif
 
+#ifdef __APPLE__
+        log_info("rt was compiled with Apple Accelerate Framework.");
+#endif
+
         log_info ("Rendering on %d threads with the following arguments:", max_threads);
         this->print_arguments ();
 
-        // #ifdef THOROTTLED_PARALLEL
+        progressbar bar (image_height);
+
+#ifdef THOROTTLED_PARALLEL
         for (int j = 0; j < this->image_height; j++) {
                 threads.push_back (std::thread ([&, j] {
                         sem.acquire ();
@@ -436,42 +442,38 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                         progress.release ();
                 }));
         }
-        // #else
-        //         for (int tid = 0; tid < max_threads; tid++) {
-        //                 threads.push_back (std::thread ([&, tid] {
-        //                         for (int j = 0; j < this->image_height; j++) {
-        //                                 sem.acquire ();
+#else
+        threads.push_back (std::thread ([&] {
+                auto start_time = std::chrono::high_resolution_clock::now ();
+                for (int p = 0; p < image_height; p++) {
+                        progress.acquire ();
+                        bar.update ();
+                }
+                auto end_time = std::chrono::high_resolution_clock::now ();
+                int time_elapsed =
+                        std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
+                std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
+                std::cerr << "\n";
+        }));
+        for (int j = 0; j < this->image_height; j++) {
+                sem.acquire ();
 
-        //                                 for (int i = 0; i < this->image_width; i++)
-        //                                         pixels[i + j * image_width] = this->sample_pixel (world, i, j);
+                threads.push_back (std::thread ([&, j] {
+                        for (int i = 0; i < this->image_width; i++)
+                                pixels[i + j * image_width] = this->sample_pixel (world, i, j);
 
-        //                                 sem.release ();
-        //                                 progress.release ();
-        //                         }
-        //                 }));
-        //         }
-        // #endif
-
-        progressbar bar (image_height);
-
-        auto start_time = std::chrono::high_resolution_clock::now ();
-
-        for (int p = 0; p < image_height; p++) {
-                progress.acquire ();
-                bar.update ();
+                        sem.release ();
+                        progress.release ();
+                }));
         }
-        std::cerr << "\n";
+
+
+#endif
 
         for (std::thread &t : threads)
                 t.join ();
 
-        auto end_time = std::chrono::high_resolution_clock::now ();
-
-        int time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end_time - start_time).count ();
-
         this->export_p6 (filename, pixels);
-
-        std::cerr << "Render took " << time_elapsed / 1000.0 << " secs.";
 }
 
 void Camera::render (World *world, const char *filename)

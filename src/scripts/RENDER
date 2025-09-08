@@ -2,12 +2,12 @@
 
 ./bin/rt --out_file=out.ppm \
         --image_width=1000 \
-        --aspect_ratio=1/1 \
+        --aspect_ratio=16/19 \
         --vfov=60 \
-        --samples_per_pixel=200 \
-        --background_image=./assets/pano2.jpg \
+        --samples_per_pixel=50 \
         --max_depth=8 \
-        --use_scene_sig
-        # --use_path_tracer \
-        # --use_light_sampling  \
-        # --use_importance_sampling \
+        --use_path_tracer \
+        --use_light_sampling  \
+        --use_importance_sampling 
+        # --background_image=./assets/pano2.jpg \
+        # --use_scene_sig

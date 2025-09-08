@@ -1,7 +1,5 @@
 class BRDF {
         BRDF ()
         {
-            
-
         }
 };
