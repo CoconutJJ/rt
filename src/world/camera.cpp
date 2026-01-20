@@ -296,7 +296,6 @@ Vec3 Camera::sample_light (World *world, HitRecord &record, SmoothObject *&hit_l
                 hemisphere)
 
                 LIGHT_AREA * dot(L, N)
-
          */
         Vec3 to_light = light_point - record.hit_point;
         double light_area = light->area ();
@@ -422,7 +421,7 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
 #endif
 
 #ifdef __APPLE__
-        log_info("rt was compiled with Apple Accelerate Framework.");
+        log_info ("rt was compiled with Apple Accelerate Framework.");
 #endif
 
         log_info ("Rendering on %d threads with the following arguments:", max_threads);
@@ -466,7 +465,6 @@ void Camera::render_multithreaded (World *world, const char *filename, int max_t
                         progress.release ();
                 }));
         }
-
 
 #endif
 

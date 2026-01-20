@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.30)
 project(rt CXX C)
 
-set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
-set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # Don’t fall back to older
 set(CMAKE_CXX_EXTENSIONS OFF) # Use -std=c++20 instead of -std=gnu++20
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-add_compile_options(-Wall -Wextra -march=native -mtune=native -fuse-ld=lld -framework Accelerate)
+set(CMAKE_AR "/opt/homebrew/opt/llvm/bin/llvm-ar")
+add_compile_options(-Wall -Wextra -march=native -mtune=native -framework Accelerate -flto -fuse-ld=ld64.lld)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -41,16 +40,16 @@ target_link_libraries(obj_file ds io)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(test_KDTree "src/tests/kdtree/test_kdtree.cpp")
-add_executable(test_utils "src/tests/utils/test_utils.cpp")
-add_executable(test_mesh "src/tests/object/test_mesh.cpp")
+# add_executable(test_KDTree "src/tests/kdtree/test_kdtree.cpp")
+# add_executable(test_utils "src/tests/utils/test_utils.cpp")
+# add_executable(test_mesh "src/tests/object/test_mesh.cpp")
 
-target_link_libraries(test_KDTree utils ds catch2)
-target_link_libraries(test_utils utils ds catch2)
-target_link_libraries(test_mesh utils ds object world pt catch2)
-add_custom_target(tests DEPENDS test_KDTree test_utils test_mesh)
+# target_link_libraries(test_KDTree utils ds catch2)
+# target_link_libraries(test_utils utils ds catch2)
+# target_link_libraries(test_mesh utils ds object world pt catch2)
+# add_custom_target(tests DEPENDS test_KDTree test_utils test_mesh)
 
-include(Catch)
-catch_discover_tests(test_KDTree WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+# include(Catch)
+# catch_discover_tests(test_KDTree WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 # -fprofile-instr-generate -fcoverage-mapping

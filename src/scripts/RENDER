@@ -4,7 +4,7 @@
         --image_width=1000 \
         --aspect_ratio=16/19 \
         --vfov=60 \
-        --samples_per_pixel=50 \
+        --samples_per_pixel=200 \
         --max_depth=8 \
         --use_path_tracer \
         --use_light_sampling  \

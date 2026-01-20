@@ -214,7 +214,7 @@ int main (int argc, char **argv)
         Lambertian white_diffuse (Vec3 (0.8, 0.8, 0.8));
         Lambertian checkers_diffuse (&checkers);
         Lambertian light (Vec3 (1, 1, 1));
-        light.emission (Vec3 (5, 5, 5));
+        light.emission (Vec3 (10, 10, 10));
 
         Metal metal (0, Vec3 (0.5, 0.5, 0.5));
 
@@ -223,7 +223,7 @@ int main (int argc, char **argv)
         Quad back_wall (Vec3 (1, 0, -2), Vec3 (0, 2, 0), Vec3 (-2, 0, 0), &blue_diffuse);
         Quad ceiling (Vec3 (1, 2, 0), Vec3 (-2, 0, 0), Vec3 (0, 0, -2), &white_diffuse);
         Quad floor (Vec3 (1, 0, 0), Vec3 (0, 0, -2), Vec3 (-2, 0, 0), &white_diffuse);
-        Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-0.5, 0, 0), Vec3 (0, 0, -0.5), &light);
+        Quad light_panel (Vec3 (0.5, 1.98, -0.5), Vec3 (-0.25, 0, 0), Vec3 (0, 0, -0.25), &light);
         Quad front_wall (Vec3 (1, 0, 0), Vec3 (-2, 0, 0), Vec3 (0, 2, 0), &blue_diffuse);
         front_wall.one_sided () = true;
         light_panel.one_sided () = true;
